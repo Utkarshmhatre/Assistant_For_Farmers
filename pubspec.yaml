@@ -1,0 +1,103 @@
+name: farm_assistx
+description: "A new Flutter project."
+
+# Prevent accidental publishing to pub.dev.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  test: ^1.21.0
+  url_launcher: ^6.1.7  # For Stripe payments, or razorpay_flutter for Razorpay
+  pdf: ^3.5.0
+  path_provider: ^2.1.4  # To access device storage
+  flutter_local_notifications: ^17.2.2  # Optional: for notifications
+  flutter_localizations:
+    sdk: flutter
+  fluttertoast: ^8.0.9
+  flutter_animate: ^4.5.0
+  table_calendar: ^3.0.0
+  google_fonts: ^6.2.1
+  carousel_slider: ^5.0.0
+  animate_do: ^3.3.4
+  cached_network_image: ^3.4.1
+  animated_text_kit: ^4.2.1
+  phonepe_payment_sdk: ^2.0.3
+  crypto: ^3.0.5
+  percent_indicator: ^4.2.3
+  youtube_player_flutter: ^9.0.3
+  google_generative_ai: ^0.2.0
+  flutter_map: 5.0.0
+  geolocator: ^13.0.2
+  latlong2: ^0.9.0
+  http: ^1.1.0
+  lottie: ^3.2.0
+  image_picker: ^1.1.2
+  fl_chart: ^0.65.0
+  shared_preferences: ^2.5.1
+  intl: ^0.19.0
+  webview_flutter: ^4.10.0
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+  qr_flutter: ^4.1.0   
+
+flutter:
+  uses-material-design: true
+
+  # Enable generation of localized Strings from arb files.
+  generate: true
+
+  assets:
+    # Add assets from the images directory to the application.
+    - assets/events.jpg
+    - assets/event2.jpg
+    - assets/event3.jpg
+    - assets/background.jpg
+    - assets/logo.png
+    - assets/images/Sun-Yellow.png
+    - assets/images/Sun-Red.png
+    - assets/images/Moon-Crescent.png
+    - assets/images/Bg-Red.png
+    - assets/images/Illustration-Red.png
+    - assets/images/Slider-Red.png
+    - assets/images/Bg-Yellow.png
+    - assets/images/Illustration-Yellow.png
+    - assets/images/Slider-Yellow.png
+    - assets/images/Illustration-Blue.png
+    - assets/images/Slider-Blue.png
+    - assets/images/Bg-Blue.png
+    - assets/images/history_image.png
+    - assets/images/durga_maa_significance.png
+    - assets/images/preparation_celebration.png
+    - assets/images/rituals_customs.png
+    - assets/images/pandals_idols.png
+    - assets/images/procession_immersion.png
+    - assets/images/bengali_culture.png
+    - assets/images/conclusion.png
+    - assets/images/conclusion_farmassistx.png
+    - assets/images/durga_mata_image.jpg
+    - assets/images/your_logo.png
+    - assets/images/farm_assistx_image.jpg
+    - assets/images/features_image.jpg
+    - assets/images/farmer_profiles.jpg
+    - assets/images/product_catalog.jpg
+    - assets/images/ordering_payment.jpg
+    - assets/images/real_time_tracking.jpg
+    - assets/images/rating_review.jpg
+    - assets/images/gps_delivery.jpg
+    - assets/glow2.gif
+    - assets/paymentbackground.gif
+    - assets/site_ids.json
+    
+dependency_overrides:
+  http: ^0.13.0
