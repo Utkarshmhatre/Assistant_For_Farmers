@@ -19,27 +19,30 @@ class InventoryProvider with ChangeNotifier {
   List<Product> get filteredProducts {
     if (_warehouse == null) return [];
 
+    // Make a local copy of products
     List<Product> products = _warehouse!.products;
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       products = products.where((p) =>
           p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+          p.category.toLowerCase().contains(_searchQuery.toLowerCase())
+      ).toList();
     }
 
     // Apply sorting
     switch (_sortOption) {
       case 'Name':
-        products.sort((a, b) => a.name.compareTo(b.name));
+        products.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         break;
       case 'Quantity':
-        products.sort((a, b) => b.quantity.compareTo(a.quantity));
+        products.sort((a, b) => a.quantity.compareTo(b.quantity));
         break;
       case 'Expiry Date':
         products.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
         break;
       default:
+        // No sorting
         break;
     }
 

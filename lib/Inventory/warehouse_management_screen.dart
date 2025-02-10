@@ -22,6 +22,8 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
   int _currentIndex = 0;
   String _searchQuery = '';
   String _sortOption = 'Name';
+  bool _showPieChartForDistribution = true; // Toggle for distribution view
+  bool _popupShown = false;
 
   @override
   void initState() {
@@ -64,11 +66,15 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddProductDialog(context),
             backgroundColor: Colors.teal,
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _currentIndex,
-            onTap: (index) => setState(() => _currentIndex = index),
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
             items: const [
               BottomNavigationBarItem(
                   icon: Icon(Icons.dashboard), label: 'Overview'),
@@ -141,22 +147,16 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
               value: percentage / 100,
               minHeight: 20,
               backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                percentage > 90
-                    ? Colors.red
-                    : (percentage > 70 ? Colors.orange : Colors.teal),
-              ),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
             ),
             const SizedBox(height: 8),
-            Text(
-              '$used / $capacity units used (${percentage.toStringAsFixed(1)}%)',
-              style: const TextStyle(color: Colors.blueGrey, fontSize: 16),
-            ),
-            const SizedBox(height: 16),
+            Text('$used of $capacity used',
+                style: const TextStyle(color: Colors.teal)),
+            const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => _showEditCapacityDialog(context),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-              child: Text('Edit Capacity'),
+              child: const Text('Edit Capacity'),
             ),
           ],
         ),
@@ -166,7 +166,9 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
   Widget _buildExpiryAlerts(InventoryProvider inventoryProvider) {
     final expiringProducts = inventoryProvider.warehouse?.products
-            .where((p) => p.expiryDate.difference(DateTime.now()).inDays <= 30)
+            .where((p) =>
+                p.expiryDate.difference(DateTime.now()).inDays <= 30 &&
+                p.expiryDate.isAfter(DateTime.now()))
             .toList() ??
         [];
 
@@ -180,25 +182,23 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Expiry Alerts',
+            const Text('Expiring Soon',
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal)),
+                    color: Colors.orange)),
             const SizedBox(height: 16),
             if (expiringProducts.isEmpty)
-              const Text('No products expiring soon.')
+              const Text('No products are expiring soon.')
             else
               Column(
                 children: expiringProducts.map((product) {
-                  final daysUntilExpiry =
+                  final daysLeft =
                       product.expiryDate.difference(DateTime.now()).inDays;
                   return ListTile(
-                    title: Text(product.name,
-                        style: const TextStyle(color: Colors.black)),
-                    subtitle: Text('Expires in $daysUntilExpiry days',
-                        style: const TextStyle(color: Colors.red)),
-                    leading: const Icon(Icons.warning, color: Colors.orange),
+                    title: Text(product.name),
+                    subtitle: Text(
+                        'Expires in $daysLeft day${daysLeft > 1 ? 's' : ''}'),
                   );
                 }).toList(),
               ),
@@ -233,20 +233,17 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal)),
+                    color: Colors.brown)),
             const SizedBox(height: 16),
-            for (var tip in tips)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.lightbulb_outline, color: Colors.yellow),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(tip)),
-                  ],
-                ),
-              ),
+            Column(
+              children: tips
+                  .map((tip) => ListTile(
+                        leading:
+                            const Icon(Icons.lightbulb, color: Colors.brown),
+                        title: Text(tip),
+                      ))
+                  .toList(),
+            ),
           ],
         ),
       ),
@@ -261,16 +258,15 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Search Products',
-              prefixIcon: const Icon(Icons.search),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(),
             ),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
-                inventoryProvider.setSearchQuery(_searchQuery);
+                inventoryProvider.setSearchQuery(value);
               });
             },
           ),
@@ -282,19 +278,18 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             decoration: const InputDecoration(
               labelText: 'Sort By',
               border: OutlineInputBorder(),
-              labelStyle: TextStyle(color: Colors.white),
+              prefixIcon: Icon(Icons.sort),
             ),
-            dropdownColor: Colors.black,
-            items: ['Name', 'Quantity', 'Expiry Date'].map((option) {
-              return DropdownMenuItem<String>(
-                value: option,
-                child:
-                    Text(option, style: const TextStyle(color: Colors.white)),
-              );
-            }).toList(),
+            items: const [
+              DropdownMenuItem(value: 'Name', child: Text('Name')),
+              DropdownMenuItem(value: 'Quantity', child: Text('Quantity')),
+              DropdownMenuItem(
+                  value: 'Expiry Date', child: Text('Expiry Date')),
+            ],
             onChanged: (value) {
               setState(() {
                 _sortOption = value!;
+                inventoryProvider.setSortOption(_sortOption);
               });
             },
           ),
@@ -304,53 +299,29 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
-              return AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 300),
-                child: Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  color: Colors.lightBlue[100],
-                  shadowColor: Colors.black.withOpacity(0.2),
-                  child: ListTile(
-                    leading: product.image != null
-                        ? SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: Image.file(
-                              File(product.image!),
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : const Icon(Icons.image_not_supported,
-                            size: 50, color: Colors.grey),
-                    title: Text(
-                      product.name,
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                    subtitle: Text(
-                      '${product.quantity} ${product.unit}',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            _showEditProductDialog(context, product, index);
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            _confirmDelete(context, inventoryProvider, index);
-                          },
-                        ),
-                      ],
-                    ),
-                    onTap: () => _showProductDetails(context, product),
+              return Card(
+                elevation: 2,
+                margin:
+                    const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                child: ListTile(
+                  title: Text(product.name),
+                  subtitle: Text(
+                      '${product.quantity} ${product.unit} · \$${product.price.toStringAsFixed(2)}'),
+                  onTap: () => _showProductDetails(context, product),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.teal),
+                        onPressed: () =>
+                            _showEditProductDialog(context, product, index),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () =>
+                            _confirmDelete(context, inventoryProvider, index),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -367,185 +338,365 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         inventoryProvider.getInventoryValueByCategory();
     final categoryColors =
         _generateCategoryColors(inventoryValueByCategory.keys.toList());
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAnalyticsCard(
-            title: 'Inventory Value by Category',
-            child: SizedBox(
-              height: 300,
-              child: BarChart(
-                BarChartData(
-                  barTouchData: BarTouchData(enabled: true),
-                  gridData: const FlGridData(show: true),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            inventoryValueByCategory.keys
-                                .elementAt(value.toInt()),
-                            style: const TextStyle(
-                                color: Colors.teal, fontSize: 12),
-                          ),
-                        ),
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Text(
-                          '₹${value.toInt()}K',
-                          style:
-                              const TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: inventoryValueByCategory.entries.map((entry) {
-                    final color = categoryColors[entry.key] ?? Colors.teal;
-                    return BarChartGroupData(
-                      x: inventoryValueByCategory.keys
-                          .toList()
-                          .indexOf(entry.key),
-                      barRods: [
-                        BarChartRodData(
-                          toY: entry.value,
-                          gradient: LinearGradient(
-                            colors: [color, color.withOpacity(0.7)],
-                            stops: const [0.1, 1.0],
-                          ),
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(6)),
-                          width: 22,
-                          backDrawRodData: BackgroundBarChartRodData(
-                            show: true,
-                            color: Colors.grey[200],
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+    // Additional metrics
+    double totalValue = inventoryProvider.getTotalInventoryValue();
+    int totalProducts = products.length;
+    double avgPrice = totalProducts > 0 ? totalValue / totalProducts : 0;
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await inventoryProvider.loadWarehouse();
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Analytics Dashboard',
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
                 ),
-              ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.teal),
+                  onPressed: () {
+                    inventoryProvider.loadWarehouse();
+                  },
+                )
+              ],
             ),
-          ),
-          const SizedBox(height: 24),
-          _buildAnalyticsCard(
-            title: 'Category Distribution',
-            child: SizedBox(
-              height: 300,
-              child: PieChart(
-                PieChartData(
-                  pieTouchData: PieTouchData(
-                    touchCallback: (event, response) {
-                      if (response != null && response.touchedSection != null) {
-                        final touchedSection = response.touchedSection!;
-                        final category = inventoryValueByCategory.keys
-                            .elementAt(touchedSection.touchedSectionIndex);
-                        final value = inventoryValueByCategory[category];
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$category: ₹$value')));
-                      }
-                    },
-                  ),
-                  sections: inventoryValueByCategory.entries.map((entry) {
-                    final color = categoryColors[entry.key] ?? Colors.teal;
-                    return PieChartSectionData(
-                      value: entry.value.toDouble(),
-                      title: '${entry.key}\n₹${entry.value}',
-                      color: color,
-                      radius: 100,
-                      titleStyle: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                      badgeWidget: CircleAvatar(
-                        backgroundColor: color,
-                        child: Text('${entry.value}',
-                            style: const TextStyle(color: Colors.white)),
-                      ),
-                      badgePositionPercentageOffset: 1.5,
-                    );
-                  }).toList(),
+            const SizedBox(height: 16),
+            // Total Inventory Value card
+            _buildAnalyticsCard(
+              title: 'Total Inventory Value',
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          _buildAnalyticsCard(
-            title: 'Inventory Trends',
-            child: SizedBox(
-              height: 300,
-              child: LineChart(
-                LineChartData(
-                  gridData: const FlGridData(show: true),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Text(
-                            '${value.toInt()}',
-                            style: const TextStyle(color: Colors.teal)),
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Text(
-                            '₹${value.toInt()}K',
-                            style: const TextStyle(color: Colors.grey)),
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(
-                      show: true, border: Border.all(color: Colors.teal)),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: _generateTrendData(products),
-                      isCurved: true,
+                child: Text(
+                  '\$${totalValue.toStringAsFixed(2)}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                       color: Colors.teal,
-                      dotData: const FlDotData(show: true),
-                      belowBarData: BarAreaData(
-                          show: true, color: Colors.teal.withOpacity(0.3)),
-                    ),
-                  ],
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          _buildAnalyticsCard(
-            title: 'Category Comparison',
-            child: SizedBox(
-              height: 300,
-              child: RadarChart(
-                RadarChartData(
-                  dataSets: [
-                    RadarDataSet(
-                      dataEntries: _generateCategoryComparisonData(
-                          inventoryValueByCategory),
-                      fillColor: Colors.teal.withOpacity(0.3),
-                      borderColor: Colors.teal,
-                      borderWidth: 2,
-                      entryRadius: 3,
-                    ),
-                  ],
-                  titlePositionPercentageOffset: 0.2,
-                  radarBorderData: const BorderSide(color: Colors.teal),
-                  radarShape: RadarShape.circle,
-                  tickCount: 5,
-                  tickBorderData: const BorderSide(color: Colors.grey),
-                  ticksTextStyle: const TextStyle(color: Colors.grey),
+            const SizedBox(height: 24),
+            // Warehouse Capacity Utilization card
+            _buildAnalyticsCard(
+              title: 'Warehouse Capacity Utilization',
+              child: Column(
+                children: [
+                  Text(
+                    '${inventoryProvider.getCapacityUtilizationPercentage().toStringAsFixed(1)}%',
+                    style: const TextStyle(
+                        color: Colors.teal,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  LinearProgressIndicator(
+                    value:
+                        inventoryProvider.getCapacityUtilizationPercentage() /
+                            100,
+                    minHeight: 12,
+                    backgroundColor: Colors.grey[300],
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.teal),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Average Product Price card
+            _buildAnalyticsCard(
+              title: 'Average Product Price',
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '\$${avgPrice.toStringAsFixed(2)}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Colors.blue,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            // Inventory Value by Category - Bar Chart
+            _buildAnalyticsCard(
+              title: 'Inventory Value by Category',
+              child: SizedBox(
+                height: screenWidth * 0.8,
+                child: BarChart(
+                  BarChartData(
+                    barTouchData: BarTouchData(enabled: true),
+                    gridData: FlGridData(show: true),
+                    titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            final index = value.toInt();
+                            if (index >= 0 &&
+                                index < inventoryValueByCategory.keys.length) {
+                              final category = inventoryValueByCategory.keys
+                                  .elementAt(index);
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  category,
+                                  style: const TextStyle(
+                                      color: Colors.teal, fontSize: 12),
+                                ),
+                              );
+                            }
+                            return const SizedBox();
+                          },
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            return Text('\$${value.toInt()}K',
+                                style: const TextStyle(
+                                    color: Colors.grey, fontSize: 10));
+                          },
+                        ),
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    barGroups: inventoryValueByCategory.entries.map((entry) {
+                      final index = inventoryValueByCategory.keys
+                          .toList()
+                          .indexOf(entry.key);
+                      final color = categoryColors[entry.key] ?? Colors.teal;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: entry.value,
+                            gradient: LinearGradient(
+                              colors: [color, color.withOpacity(0.7)],
+                              stops: const [0.1, 1.0],
+                            ),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(6)),
+                            width: screenWidth * 0.06,
+                            backDrawRodData: BackgroundBarChartRodData(
+                              show: true,
+                              color: Colors.grey[200]!,
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Category Distribution (Pie vs. Bar toggle)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Category Distribution',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
+                ),
+                Row(
+                  children: [
+                    const Text('Bar', style: TextStyle(color: Colors.teal)),
+                    Switch(
+                      value: _showPieChartForDistribution,
+                      onChanged: (value) {
+                        setState(() {
+                          _showPieChartForDistribution = value;
+                        });
+                      },
+                      activeColor: Colors.teal,
+                    ),
+                    const Text('Pie', style: TextStyle(color: Colors.teal)),
+                  ],
+                )
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildAnalyticsCard(
+              title: '',
+              child: _showPieChartForDistribution
+                  ? SizedBox(
+                      height: screenWidth * 0.8,
+                      child: PieChart(
+                        PieChartData(
+                          pieTouchData: PieTouchData(
+                            touchCallback: (FlTouchEvent event,
+                                PieTouchResponse? response) {
+                              if (!event.isInterestedForInteractions ||
+                                  response == null ||
+                                  response.touchedSection == null) return;
+                              if (event is FlTapUpEvent) {
+                                final touchedIndex = response
+                                    .touchedSection!.touchedSectionIndex;
+                                if (touchedIndex <
+                                    inventoryValueByCategory.keys.length) {
+                                  final category = inventoryValueByCategory.keys
+                                      .elementAt(touchedIndex);
+                                  final productsUnderCategory =
+                                      inventoryProvider.warehouse?.products
+                                              .where(
+                                                  (p) => p.category == category)
+                                              .toList() ??
+                                          [];
+                                  _showProductsUnderCategoryDialog(
+                                      context, category, productsUnderCategory);
+                                }
+                              }
+                            },
+                          ),
+                          sections:
+                              inventoryValueByCategory.entries.map((entry) {
+                            final color =
+                                categoryColors[entry.key] ?? Colors.teal;
+                            return PieChartSectionData(
+                              value: entry.value.toDouble(),
+                              title:
+                                  '${entry.key}\n\$${entry.value.toStringAsFixed(0)}',
+                              color: color,
+                              radius: screenWidth * 0.2,
+                              titleStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    )
+                  : SizedBox(
+                      height: screenWidth * 0.8,
+                      child: BarChart(
+                        BarChartData(
+                          barTouchData: BarTouchData(enabled: true),
+                          gridData: FlGridData(show: true),
+                          titlesData: FlTitlesData(
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) {
+                                  final index = value.toInt();
+                                  if (index >= 0 &&
+                                      index <
+                                          inventoryValueByCategory
+                                              .keys.length) {
+                                    final category = inventoryValueByCategory
+                                        .keys
+                                        .elementAt(index);
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        category,
+                                        style: const TextStyle(
+                                            color: Colors.teal, fontSize: 12),
+                                      ),
+                                    );
+                                  }
+                                  return const SizedBox();
+                                },
+                              ),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    '\$${value.toInt()}K',
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 10),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          borderData: FlBorderData(show: false),
+                          barGroups:
+                              inventoryValueByCategory.entries.map((entry) {
+                            final idx = inventoryValueByCategory.keys
+                                .toList()
+                                .indexOf(entry.key);
+                            final color =
+                                categoryColors[entry.key] ?? Colors.teal;
+                            return BarChartGroupData(
+                              x: idx,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: entry.value,
+                                  gradient: LinearGradient(
+                                    colors: [color, color.withOpacity(0.7)],
+                                    stops: const [0.1, 1.0],
+                                  ),
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(6)),
+                                  width: screenWidth * 0.06,
+                                  backDrawRodData: BackgroundBarChartRodData(
+                                    show: true,
+                                    color: Colors.grey[200]!,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            // Total Products Count card
+            _buildAnalyticsCard(
+              title: 'Total Products Count',
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$totalProducts Products',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Colors.purple,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -554,19 +705,22 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.pink[100],
+      color: Colors.white,
       shadowColor: Colors.black.withOpacity(0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
+            if (title.isNotEmpty)
+              Text(
+                title,
                 style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal)),
-            const SizedBox(height: 16),
+                    color: Colors.teal),
+              ),
+            if (title.isNotEmpty) const SizedBox(height: 16),
             child,
           ],
         ),
@@ -685,20 +839,19 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         return AlertDialog(
           title: Text(product.name),
           content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Category: ${product.category}'),
               Text('Quantity: ${product.quantity} ${product.unit}'),
-              Text('Price: ₹${product.price.toStringAsFixed(2)}'),
+              Text('Price: \$${product.price.toStringAsFixed(2)}'),
               Text(
-                  'Expiry Date: ${DateFormat('yyyy-MM-dd').format(product.expiryDate)}'),
+                  'Expiry Date: ${DateFormat.yMMMMd().format(product.expiryDate)}'),
             ],
           ),
           actions: [
             TextButton(
-              child: const Text('Close'),
               onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
             ),
           ],
         );
@@ -727,19 +880,55 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Product'),
+          title: const Text('Confirm Delete'),
           content: const Text('Are you sure you want to delete this product?'),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
             ),
             TextButton(
-              child: const Text('Delete'),
               onPressed: () {
                 inventoryProvider.deleteProduct(index);
                 Navigator.of(context).pop();
               },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showProductsUnderCategoryDialog(
+      BuildContext context, String category, List<Product> products) {
+    return showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text('Products in "$category"'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: products.isEmpty
+                ? const Text('No products found in this category.')
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return ListTile(
+                        title: Text(product.name),
+                        subtitle: Text(
+                          'Quantity: ${product.quantity} ${product.unit} · \$${product.price.toStringAsFixed(2)}',
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
             ),
           ],
         );
@@ -747,6 +936,8 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     );
   }
 }
+
+// Below are the AddProductForm and EditProductForm widgets (in the same file)
 
 class AddProductForm extends StatefulWidget {
   const AddProductForm({super.key});
@@ -768,10 +959,7 @@ class _AddProductFormState extends State<AddProductForm> {
   @override
   Widget build(BuildContext context) {
     final inventoryProvider = Provider.of<InventoryProvider>(context);
-    final categories =
-        inventoryProvider.getCategories(); // Get categories from provider
-    final products =
-        inventoryProvider.getProducts(); // Get products from provider
+    final categories = inventoryProvider.getCategories();
 
     return Form(
       key: _formKey,
@@ -780,35 +968,31 @@ class _AddProductFormState extends State<AddProductForm> {
         children: [
           TextFormField(
             decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Colors.white)),
-            validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
+              labelText: 'Product Name',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) =>
+                value!.isEmpty ? 'Please enter product name' : null,
             onSaved: (value) => _name = value!,
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(
               labelText: 'Category',
               border: OutlineInputBorder(),
-              labelStyle: TextStyle(color: Colors.white),
             ),
-            value: _category.isNotEmpty ? _category : null,
-            items: [
-              ...categories.map((category) {
-                return DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(category,
-                      style: const TextStyle(color: Colors.white)),
-                );
-              }),
-              const DropdownMenuItem<String>(
-                value: 'add_new',
-                child: Text('Add New Category',
-                    style: TextStyle(color: Colors.white)),
+            items: categories.map((String category) {
+              return DropdownMenuItem<String>(
+                value: category,
+                child: Text(category),
+              );
+            }).toList()
+              ..add(
+                const DropdownMenuItem(
+                  value: 'add_new',
+                  child: Text('Add New Category'),
+                ),
               ),
-            ],
             onChanged: (value) {
               if (value == 'add_new') {
                 _showAddCategoryDialog();
@@ -818,45 +1002,42 @@ class _AddProductFormState extends State<AddProductForm> {
                 });
               }
             },
-            validator: (value) =>
-                value == null ? 'Please select a category' : null,
-            dropdownColor: Colors.black,
+            validator: (value) => value == null || value.isEmpty
+                ? 'Please select a category'
+                : null,
           ),
           const SizedBox(height: 10),
           TextFormField(
             decoration: const InputDecoration(
-                labelText: 'Quantity',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Colors.white)),
+              labelText: 'Quantity',
+              border: OutlineInputBorder(),
+            ),
             keyboardType: TextInputType.number,
             validator: (value) => int.tryParse(value!) == null
                 ? 'Please enter a valid number'
                 : null,
             onSaved: (value) => _quantity = int.parse(value!),
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           TextFormField(
             decoration: const InputDecoration(
-                labelText: 'Unit',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Colors.white)),
-            validator: (value) => value!.isEmpty ? 'Please enter a unit' : null,
+              labelText: 'Unit',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) => value!.isEmpty ? 'Please enter unit' : null,
             onSaved: (value) => _unit = value!,
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           TextFormField(
             decoration: const InputDecoration(
-                labelText: 'Price',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Colors.white)),
+              labelText: 'Price',
+              border: OutlineInputBorder(),
+            ),
             keyboardType: TextInputType.number,
             validator: (value) => double.tryParse(value!) == null
                 ? 'Please enter a valid number'
                 : null,
             onSaved: (value) => _price = double.parse(value!),
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           InkWell(
@@ -869,17 +1050,16 @@ class _AddProductFormState extends State<AddProductForm> {
               );
               if (picked != null) {
                 setState(() {
-                  _expiryDate = picked; // Store the image path as a string
+                  _expiryDate = picked;
                 });
               }
             },
             child: InputDecorator(
               decoration: const InputDecoration(
-                  labelText: 'Expiry Date',
-                  border: OutlineInputBorder(),
-                  labelStyle: TextStyle(color: Colors.white)),
-              child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate),
-                  style: const TextStyle(color: Colors.white)),
+                labelText: 'Expiry Date',
+                border: OutlineInputBorder(),
+              ),
+              child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate)),
             ),
           ),
           const SizedBox(height: 10),
@@ -889,7 +1069,7 @@ class _AddProductFormState extends State<AddProductForm> {
                   await ImagePicker().pickImage(source: ImageSource.gallery);
               if (pickedImage != null) {
                 setState(() {
-                  _image = pickedImage.path; // Store the image path as a string
+                  _image = pickedImage.path;
                 });
               }
             },
@@ -897,8 +1077,7 @@ class _AddProductFormState extends State<AddProductForm> {
           ),
           if (_image != null) ...[
             const SizedBox(height: 10),
-            Text(
-                'Selected Image: ${_image!.split('/').last}'), // Display the image name
+            Text('Selected Image: ${_image!.split('/').last}'),
           ],
           const SizedBox(height: 20),
           ElevatedButton(
@@ -912,14 +1091,14 @@ class _AddProductFormState extends State<AddProductForm> {
                   unit: _unit,
                   price: _price,
                   expiryDate: _expiryDate,
-                  image: _image, // Save the image path
+                  image: _image,
                 );
                 inventoryProvider.addProduct(newProduct);
                 Navigator.of(context).pop();
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-            child: Text('Add Product'),
+            child: const Text('Add Product'),
           ),
         ],
       ),
@@ -932,7 +1111,7 @@ class _AddProductFormState extends State<AddProductForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white, // Light background for dark text
+          backgroundColor: Colors.white,
           title: const Text('Add New Category',
               style: TextStyle(color: Colors.black)),
           content: TextField(
@@ -1013,7 +1192,6 @@ class _EditProductFormState extends State<EditProductForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ...similar fields as AddProductForm...
           TextFormField(
             initialValue: _name,
             decoration: const InputDecoration(
@@ -1137,7 +1315,7 @@ class _EditProductFormState extends State<EditProductForm> {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-            child: Text('Update Product'),
+            child: const Text('Update Product'),
           ),
         ],
       ),
