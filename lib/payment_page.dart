@@ -345,19 +345,22 @@ class _PaymentPageState extends State<PaymentPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Receipt'),
+          backgroundColor: Colors.black,
+          title: const Text(
+            'Receipt',
+            style: TextStyle(color: Colors.white),
+          ),
           content: Text(
             'Dear $name,\n\n'
             'Thank you for your payment to the farmer at $location.\n'
             'We appreciate your support!\n\n'
             'Please keep this receipt for your records.',
+            style: TextStyle(color: Colors.white),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close', style: TextStyle(color: Colors.blue)),
             ),
           ],
         );

@@ -1,0 +1,48 @@
+# Flutter/Dart related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+build/
+.flutter-versions
+.meteor/local
+
+# iOS related
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android related
+android/.gradle/
+android/app/build/
+.android/
+**/gradlew
+**/gradlew.bat
+**/local.properties
+
+# macOS related
+macos/Flutter/ephemeral/
+macos/Pods/
+
+# Windows related
+windows/runner/Debug/
+windows/runner/Release/
+windows/flutter/ephemeral/
+
+# Linux related
+linux/flutter/ephemeral/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+.DS_Store
+
+# Miscellaneous
+*.log
+pubspec.lock
