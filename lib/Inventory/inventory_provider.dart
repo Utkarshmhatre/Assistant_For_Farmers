@@ -24,18 +24,16 @@ class InventoryProvider with ChangeNotifier {
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
-      products = products
-          .where((p) =>
-              p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              p.category.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
+      products = products.where((p) =>
+          p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          p.category.toLowerCase().contains(_searchQuery.toLowerCase())
+      ).toList();
     }
 
     // Apply sorting
     switch (_sortOption) {
       case 'Name':
-        products.sort(
-            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        products.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         break;
       case 'Quantity':
         products.sort((a, b) => a.quantity.compareTo(b.quantity));
@@ -69,78 +67,15 @@ class InventoryProvider with ChangeNotifier {
     try {
       _warehouse = await DatabaseHelper.instance.getWarehouse();
       if (_warehouse == null) {
-        _warehouse =
-            Warehouse(name: "Farm Warehouse", capacity: 1000, products: []);
+        _warehouse = Warehouse(name: "Farm Warehouse", capacity: 1000, products: []);
         await DatabaseHelper.instance.saveWarehouse(_warehouse!);
       }
-      _categories = _warehouse!.products
-          .map((product) => product.category)
-          .toSet()
-          .toList(); // Load categories from products
+      _categories = _warehouse!.products.map((product) => product.category).toSet().toList(); // Load categories from products
     } catch (e) {
       print('Error loading warehouse: $e');
     }
 
     _isLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> seedDummyDataIfEmpty() async {
-    if (_warehouse == null) return;
-    if (_warehouse!.products.isNotEmpty) return;
-    final now = DateTime.now();
-    _warehouse!.products.addAll([
-      Product(
-          name: 'Wheat',
-          category: 'Grains',
-          quantity: 200,
-          unit: 'kg',
-          price: 1.2,
-          expiryDate: now.add(const Duration(days: 180)),
-          image: 'assets/images/grains.png'),
-      Product(
-          name: 'Rice',
-          category: 'Grains',
-          quantity: 150,
-          unit: 'kg',
-          price: 1.0,
-          expiryDate: now.add(const Duration(days: 200)),
-          image: 'assets/images/grains.png'),
-      Product(
-          name: 'Tomato',
-          category: 'Vegetables',
-          quantity: 30,
-          unit: 'kg',
-          price: 0.8,
-          expiryDate: now.add(const Duration(days: 5)),
-          image: 'assets/images/vegetables.png'),
-      Product(
-          name: 'Milk',
-          category: 'Dairy',
-          quantity: 50,
-          unit: 'L',
-          price: 0.6,
-          expiryDate: now.add(const Duration(days: 3)),
-          image: 'assets/images/dairy.png'),
-      Product(
-          name: 'Apples',
-          category: 'Fruits',
-          quantity: 40,
-          unit: 'kg',
-          price: 1.5,
-          expiryDate: now.add(const Duration(days: 20)),
-          image: 'assets/images/fruits.png'),
-      Product(
-          name: 'Chicken',
-          category: 'Meat',
-          quantity: 20,
-          unit: 'kg',
-          price: 3.5,
-          expiryDate: now.add(const Duration(days: 7)),
-          image: 'assets/images/meat.png'),
-    ]);
-    _categories = _warehouse!.products.map((p) => p.category).toSet().toList();
-    await DatabaseHelper.instance.saveWarehouse(_warehouse!);
     notifyListeners();
   }
 
@@ -153,8 +88,7 @@ class InventoryProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final existingProductIndex = _warehouse!.products
-        .indexWhere((p) => p.name.toLowerCase() == product.name.toLowerCase());
+    final existingProductIndex = _warehouse!.products.indexWhere((p) => p.name.toLowerCase() == product.name.toLowerCase());
     if (existingProductIndex != -1) {
       // Update existing product quantity
       _warehouse!.products[existingProductIndex].quantity += product.quantity;
@@ -182,32 +116,26 @@ class InventoryProvider with ChangeNotifier {
   List<Product> getExpiringProducts({int days = 30}) {
     if (_warehouse == null) return [];
     final now = DateTime.now();
-    return _warehouse!.products
-        .where((p) => p.expiryDate.difference(now).inDays <= days)
-        .toList();
+    return _warehouse!.products.where((p) => p.expiryDate.difference(now).inDays <= days).toList();
   }
 
   Map<String, double> getInventoryValueByCategory() {
     if (_warehouse == null) return {};
     final valueByCategory = <String, double>{};
     for (var product in _warehouse!.products) {
-      valueByCategory[product.category] =
-          (valueByCategory[product.category] ?? 0) +
-              (product.price * product.quantity);
+      valueByCategory[product.category] = (valueByCategory[product.category] ?? 0) + (product.price * product.quantity);
     }
     return valueByCategory;
   }
 
   double getTotalInventoryValue() {
     if (_warehouse == null) return 0;
-    return _warehouse!.products
-        .fold(0, (sum, product) => sum + (product.price * product.quantity));
+    return _warehouse!.products.fold(0, (sum, product) => sum + (product.price * product.quantity));
   }
 
   int getUsedCapacity() {
     if (_warehouse == null) return 0;
-    return _warehouse!.products
-        .fold(0, (sum, product) => sum + product.quantity);
+    return _warehouse!.products.fold(0, (sum, product) => sum + product.quantity);
   }
 
   double getCapacityUtilizationPercentage() {
