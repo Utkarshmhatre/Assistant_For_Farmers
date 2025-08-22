@@ -85,7 +85,7 @@ This project is licensed under the [MIT License](LICENSE)
 
 ## 📞 Contact
 - Project Lead - [Utkarsh Naresh Mhatre](mailto:utkarshmhatre434@gmail.com)
-- Project Link: [https://github.com/Utkarshmhatre/FarmAssistX](https://github.com/Utkarshmhatre/FarmAssistX)
+- Project Link: [https://github.com/Utkarshmhatre/Farm_AssistX](https://github.com/Utkarshmhatre/Farm_AssistX)
 
 ## 🙏 Acknowledgments
 
