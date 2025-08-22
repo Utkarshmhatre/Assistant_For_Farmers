@@ -5,6 +5,8 @@ import 'package:farm_assistx/Inventory/warehouse.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 class AddProductForm extends StatefulWidget {
   const AddProductForm({super.key});
@@ -26,8 +28,8 @@ class _AddProductFormState extends State<AddProductForm> {
   @override
   Widget build(BuildContext context) {
     final inventoryProvider = Provider.of<InventoryProvider>(context);
-    final categories = inventoryProvider.getCategories(); // Get categories from provider
-    final products = inventoryProvider.getProducts(); // Get products from provider
+    final categories =
+        inventoryProvider.getCategories(); // Get categories from provider
 
     return Form(
       key: _formKey,
@@ -35,29 +37,28 @@ class _AddProductFormState extends State<AddProductForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
-            decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder(), labelStyle: TextStyle(color: Colors.white)),
+            decoration: const InputDecoration(
+                labelText: 'Name', border: OutlineInputBorder()),
             validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
             onSaved: (value) => _name = value!,
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(
               labelText: 'Category',
               border: OutlineInputBorder(),
-              labelStyle: TextStyle(color: Colors.white),
             ),
             value: _category.isNotEmpty ? _category : null,
             items: [
               ...categories.map((category) {
                 return DropdownMenuItem<String>(
                   value: category,
-                  child: Text(category, style: const TextStyle(color: Colors.white)),
+                  child: Text(category),
                 );
               }),
               const DropdownMenuItem<String>(
                 value: 'add_new',
-                child: Text('Add New Category', style: TextStyle(color: Colors.white)),
+                child: Text('Add New Category'),
               ),
             ],
             onChanged: (value) {
@@ -69,31 +70,35 @@ class _AddProductFormState extends State<AddProductForm> {
                 });
               }
             },
-            validator: (value) => value == null ? 'Please select a category' : null,
-            dropdownColor: Colors.black,
+            validator: (value) =>
+                value == null ? 'Please select a category' : null,
           ),
           const SizedBox(height: 10),
           TextFormField(
-            decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder(), labelStyle: TextStyle(color: Colors.white)),
+            decoration: const InputDecoration(
+                labelText: 'Quantity', border: OutlineInputBorder()),
             keyboardType: TextInputType.number,
-            validator: (value) => int.tryParse(value!) == null ? 'Please enter a valid number' : null,
+            validator: (value) => int.tryParse(value!) == null
+                ? 'Please enter a valid number'
+                : null,
             onSaved: (value) => _quantity = int.parse(value!),
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           TextFormField(
-            decoration: const InputDecoration(labelText: 'Unit', border: OutlineInputBorder(), labelStyle: TextStyle(color: Colors.white)),
+            decoration: const InputDecoration(
+                labelText: 'Unit', border: OutlineInputBorder()),
             validator: (value) => value!.isEmpty ? 'Please enter a unit' : null,
             onSaved: (value) => _unit = value!,
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           TextFormField(
-            decoration: const InputDecoration(labelText: 'Price', border: OutlineInputBorder(), labelStyle: TextStyle(color: Colors.white)),
+            decoration: const InputDecoration(
+                labelText: 'Price', border: OutlineInputBorder()),
             keyboardType: TextInputType.number,
-            validator: (value) => double.tryParse(value!) == null ? 'Please enter a valid number' : null,
+            validator: (value) => double.tryParse(value!) == null
+                ? 'Please enter a valid number'
+                : null,
             onSaved: (value) => _price = double.parse(value!),
-            style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 10),
           InkWell(
@@ -111,17 +116,20 @@ class _AddProductFormState extends State<AddProductForm> {
               }
             },
             child: InputDecorator(
-              decoration: const InputDecoration(labelText: 'Expiry Date', border: OutlineInputBorder(), labelStyle: TextStyle(color: Colors.white)),
-              child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate), style: const TextStyle(color: Colors.white)),
+              decoration: const InputDecoration(
+                  labelText: 'Expiry Date', border: OutlineInputBorder()),
+              child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate)),
             ),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () async {
-              final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+              final pickedImage =
+                  await ImagePicker().pickImage(source: ImageSource.gallery);
               if (pickedImage != null) {
+                final savedPath = await _saveImageToAppDir(pickedImage);
                 setState(() {
-                  _image = pickedImage.path; // Store the image path as a string
+                  _image = savedPath; // Store the persistent image path
                 });
               }
             },
@@ -138,7 +146,7 @@ class _AddProductFormState extends State<AddProductForm> {
                   fit: BoxFit.cover,
                 ),
               ),
-              title: const Text('Product Image', style: TextStyle(color: Colors.black)),
+              title: const Text('Product Image'),
             ),
           ],
           const SizedBox(height: 20),
@@ -173,13 +181,10 @@ class _AddProductFormState extends State<AddProductForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add New Category', style: TextStyle(color: Colors.white)),
-          backgroundColor: Colors.black,
+          title: const Text('Add New Category'),
           content: TextField(
-            style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: 'Category Name',
-              labelStyle: TextStyle(color: Colors.white),
             ),
             onChanged: (value) {
               newCategory = value;
@@ -187,14 +192,15 @@ class _AddProductFormState extends State<AddProductForm> {
           ),
           actions: [
             TextButton(
-              child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+              child: const Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('Add', style: TextStyle(color: Colors.white)),
+              child: const Text('Add'),
               onPressed: () {
                 if (newCategory.isNotEmpty) {
-                  Provider.of<InventoryProvider>(context, listen: false).addCategory(newCategory);
+                  Provider.of<InventoryProvider>(context, listen: false)
+                      .addCategory(newCategory);
                   setState(() {
                     _category = newCategory;
                   });
@@ -206,5 +212,15 @@ class _AddProductFormState extends State<AddProductForm> {
         );
       },
     );
+  }
+
+  Future<String> _saveImageToAppDir(XFile xfile) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final ext = p.extension(xfile.path);
+    final filename = 'img_${DateTime.now().millisecondsSinceEpoch}$ext';
+    final newPath = p.join(dir.path, filename);
+    final file = File(xfile.path);
+    await file.copy(newPath);
+    return newPath;
   }
 }

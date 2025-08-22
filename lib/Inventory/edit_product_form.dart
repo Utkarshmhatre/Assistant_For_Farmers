@@ -5,12 +5,15 @@ import 'package:farm_assistx/Inventory/inventory_provider.dart';
 import 'package:farm_assistx/Inventory/warehouse.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 class EditProductForm extends StatefulWidget {
   final Product product;
   final int index;
 
-  const EditProductForm({super.key, required this.product, required this.index});
+  const EditProductForm(
+      {super.key, required this.product, required this.index});
 
   @override
   _EditProductFormState createState() => _EditProductFormState();
@@ -50,13 +53,15 @@ class _EditProductFormState extends State<EditProductForm> {
         children: [
           TextFormField(
             initialValue: _name,
-            decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Name', border: OutlineInputBorder()),
             validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
             onSaved: (value) => _name = value!,
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Category', border: OutlineInputBorder()),
             value: _category,
             items: [
               ...categories.map((category) {
@@ -79,29 +84,37 @@ class _EditProductFormState extends State<EditProductForm> {
                 });
               }
             },
-            validator: (value) => value == null ? 'Please select a category' : null,
+            validator: (value) =>
+                value == null ? 'Please select a category' : null,
           ),
           const SizedBox(height: 10),
           TextFormField(
             initialValue: _quantity.toString(),
-            decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Quantity', border: OutlineInputBorder()),
             keyboardType: TextInputType.number,
-            validator: (value) => int.tryParse(value!) == null ? 'Please enter a valid number' : null,
+            validator: (value) => int.tryParse(value!) == null
+                ? 'Please enter a valid number'
+                : null,
             onSaved: (value) => _quantity = int.parse(value!),
           ),
           const SizedBox(height: 10),
           TextFormField(
             initialValue: _unit,
-            decoration: const InputDecoration(labelText: 'Unit', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Unit', border: OutlineInputBorder()),
             validator: (value) => value!.isEmpty ? 'Please enter a unit' : null,
             onSaved: (value) => _unit = value!,
           ),
           const SizedBox(height: 10),
           TextFormField(
             initialValue: _price.toString(),
-            decoration: const InputDecoration(labelText: 'Price', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Price', border: OutlineInputBorder()),
             keyboardType: TextInputType.number,
-            validator: (value) => double.tryParse(value!) == null ? 'Please enter a valid number' : null,
+            validator: (value) => double.tryParse(value!) == null
+                ? 'Please enter a valid number'
+                : null,
             onSaved: (value) => _price = double.parse(value!),
           ),
           const SizedBox(height: 10),
@@ -120,17 +133,20 @@ class _EditProductFormState extends State<EditProductForm> {
               }
             },
             child: InputDecorator(
-              decoration: const InputDecoration(labelText: 'Expiry Date', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                  labelText: 'Expiry Date', border: OutlineInputBorder()),
               child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate)),
             ),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () async {
-              final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+              final pickedImage =
+                  await ImagePicker().pickImage(source: ImageSource.gallery);
               if (pickedImage != null) {
+                final savedPath = await _saveImageToAppDir(pickedImage);
                 setState(() {
-                  _image = pickedImage.path;
+                  _image = savedPath;
                 });
               }
             },
@@ -147,7 +163,8 @@ class _EditProductFormState extends State<EditProductForm> {
                   fit: BoxFit.cover,
                 ),
               ),
-              title: const Text('Product Image', style: TextStyle(color: Colors.black)),
+              title: const Text('Product Image',
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
           const SizedBox(height: 20),
@@ -198,7 +215,8 @@ class _EditProductFormState extends State<EditProductForm> {
               child: const Text('Add'),
               onPressed: () {
                 if (newCategory.isNotEmpty) {
-                  Provider.of<InventoryProvider>(context, listen: false).addCategory(newCategory);
+                  Provider.of<InventoryProvider>(context, listen: false)
+                      .addCategory(newCategory);
                   setState(() {
                     _category = newCategory;
                   });
@@ -210,5 +228,15 @@ class _EditProductFormState extends State<EditProductForm> {
         );
       },
     );
+  }
+
+  Future<String> _saveImageToAppDir(XFile xfile) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final ext = p.extension(xfile.path);
+    final filename = 'img_${DateTime.now().millisecondsSinceEpoch}$ext';
+    final newPath = p.join(dir.path, filename);
+    final file = File(xfile.path);
+    await file.copy(newPath);
+    return newPath;
   }
 }

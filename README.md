@@ -34,6 +34,11 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - AI Assistant: In-app chat powered by Google Gemini for guidance and Q&A.
 - Weather: Current conditions to inform planning and logistics.
 - Inventory/Warehouse: Manage stock and track items.
+	- Unified theming with the app (Material 3 ColorScheme) for readable light/dark UI
+	- Add, edit, delete products with image thumbnails and category management
+	- Persistent product images (stored in app documents directory)
+	- Search and sort (by name, quantity, expiry)
+	- Capacity indicator, expiry alerts, and quick tips
 - Distribution/Map: Map screen to visualize sites and help plan routes.
 - Payments: PhonePe SDK integration (sandbox) with animated UI and receipt dialog.
 - Gallery/Products: Browse produce with images and details.
@@ -69,6 +74,8 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Maps Integration**: OpenStreetMap & Apple Maps
 - **Build System**: Gradle
 - **Local Storage**: Shared Preferences
+- **File Storage**: path_provider + path (for persistent product images)
+- **Charting**: fl_chart (analytics)
 
 ### Advanced Features
 - **Machine Learning**: Random Forest algorithms for optimization
@@ -89,9 +96,17 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 	- Material 3 light/dark themes with high-contrast color scheme
 	- Consistent chips, cards, inputs, and button styling via ThemeData
 - Inventory/Warehouse
+	- Unified with global theme (reduced brightness, better contrast in light mode; high-contrast dark mode)
+	- Images now persist: gallery selections are copied into app's documents directory and render reliably
+	- Seeded dummy fruits/vegetables/dairy/grains on first run to showcase features
+	- Expanded Analytics:
+		- Inventory value by category (bar chart) and category distribution (pie/bar toggle)
+		- Low stock alerts (<= 10), Expiring soon (14 days)
+		- Top value items and Average shelf-life by category (progress bars)
+	- Optimized charts and colors for readability and performance
 	- Images now display using safe asset/file avatar handling with graceful fallbacks
 	- Seeded dummy products on first run to showcase features
-	- Expanded Analytics: value and quantity by category charts, low stock and expiring soon lists, and top valuable products
+	- Expanded Analytics: value and quantity by category charts, low stock and expiring soon Lists, and top valuable products
 	- Optimized charts with tooltips, grid lines, spacing, and better scaling
 
 ## 📱 Screenshots

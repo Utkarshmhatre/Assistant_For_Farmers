@@ -24,16 +24,18 @@ class InventoryProvider with ChangeNotifier {
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
-      products = products.where((p) =>
-          p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      products = products
+          .where((p) =>
+              p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              p.category.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
     }
 
     // Apply sorting
     switch (_sortOption) {
       case 'Name':
-        products.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        products.sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         break;
       case 'Quantity':
         products.sort((a, b) => a.quantity.compareTo(b.quantity));
@@ -67,16 +69,89 @@ class InventoryProvider with ChangeNotifier {
     try {
       _warehouse = await DatabaseHelper.instance.getWarehouse();
       if (_warehouse == null) {
-        _warehouse = Warehouse(name: "Farm Warehouse", capacity: 1000, products: []);
+        _warehouse =
+            Warehouse(name: "Farm Warehouse", capacity: 1000, products: []);
+        // Seed sample produce
+        _warehouse!.products.addAll(_sampleProducts());
         await DatabaseHelper.instance.saveWarehouse(_warehouse!);
       }
-      _categories = _warehouse!.products.map((product) => product.category).toSet().toList(); // Load categories from products
+      // If warehouse exists but empty, seed once for better UX
+      if (_warehouse!.products.isEmpty) {
+        _warehouse!.products.addAll(_sampleProducts());
+        await DatabaseHelper.instance.saveWarehouse(_warehouse!);
+      }
+      _categories = _warehouse!.products
+          .map((product) => product.category)
+          .toSet()
+          .toList(); // Load categories from products
     } catch (e) {
       print('Error loading warehouse: $e');
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  List<Product> _sampleProducts() {
+    final now = DateTime.now();
+    return [
+      Product(
+          name: 'Tomato',
+          category: 'Vegetables',
+          quantity: 35,
+          unit: 'kg',
+          price: 1.2,
+          expiryDate: now.add(const Duration(days: 7)),
+          image: 'asset:assets/images/Illustration-Red.png'),
+      Product(
+          name: 'Potato',
+          category: 'Vegetables',
+          quantity: 80,
+          unit: 'kg',
+          price: 0.8,
+          expiryDate: now.add(const Duration(days: 25)),
+          image: 'asset:assets/images/Illustration-Yellow.png'),
+      Product(
+          name: 'Onion',
+          category: 'Vegetables',
+          quantity: 50,
+          unit: 'kg',
+          price: 0.9,
+          expiryDate: now.add(const Duration(days: 20)),
+          image: 'asset:assets/images/Illustration-Blue.png'),
+      Product(
+          name: 'Apple',
+          category: 'Fruits',
+          quantity: 40,
+          unit: 'kg',
+          price: 2.5,
+          expiryDate: now.add(const Duration(days: 15)),
+          image: 'asset:assets/images/Slider-Red.png'),
+      Product(
+          name: 'Banana',
+          category: 'Fruits',
+          quantity: 60,
+          unit: 'kg',
+          price: 1.1,
+          expiryDate: now.add(const Duration(days: 5)),
+          image: 'asset:assets/images/Slider-Yellow.png'),
+      Product(
+          name: 'Milk',
+          category: 'Dairy',
+          quantity: 25,
+          unit: 'L',
+          price: 0.6,
+          expiryDate: now.add(const Duration(days: 6)),
+          image: 'asset:assets/images/Bg-Blue.png'),
+      Product(
+          name: 'Rice',
+          category: 'Grains',
+          quantity: 120,
+          unit: 'kg',
+          price: 0.5,
+          expiryDate: now.add(const Duration(days: 180)),
+          image: 'asset:assets/images/Bg-Yellow.png'),
+    ];
   }
 
   void addCategory(String category) {
@@ -88,7 +163,8 @@ class InventoryProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final existingProductIndex = _warehouse!.products.indexWhere((p) => p.name.toLowerCase() == product.name.toLowerCase());
+    final existingProductIndex = _warehouse!.products
+        .indexWhere((p) => p.name.toLowerCase() == product.name.toLowerCase());
     if (existingProductIndex != -1) {
       // Update existing product quantity
       _warehouse!.products[existingProductIndex].quantity += product.quantity;
@@ -116,26 +192,32 @@ class InventoryProvider with ChangeNotifier {
   List<Product> getExpiringProducts({int days = 30}) {
     if (_warehouse == null) return [];
     final now = DateTime.now();
-    return _warehouse!.products.where((p) => p.expiryDate.difference(now).inDays <= days).toList();
+    return _warehouse!.products
+        .where((p) => p.expiryDate.difference(now).inDays <= days)
+        .toList();
   }
 
   Map<String, double> getInventoryValueByCategory() {
     if (_warehouse == null) return {};
     final valueByCategory = <String, double>{};
     for (var product in _warehouse!.products) {
-      valueByCategory[product.category] = (valueByCategory[product.category] ?? 0) + (product.price * product.quantity);
+      valueByCategory[product.category] =
+          (valueByCategory[product.category] ?? 0) +
+              (product.price * product.quantity);
     }
     return valueByCategory;
   }
 
   double getTotalInventoryValue() {
     if (_warehouse == null) return 0;
-    return _warehouse!.products.fold(0, (sum, product) => sum + (product.price * product.quantity));
+    return _warehouse!.products
+        .fold(0, (sum, product) => sum + (product.price * product.quantity));
   }
 
   int getUsedCapacity() {
     if (_warehouse == null) return 0;
-    return _warehouse!.products.fold(0, (sum, product) => sum + product.quantity);
+    return _warehouse!.products
+        .fold(0, (sum, product) => sum + product.quantity);
   }
 
   double getCapacityUtilizationPercentage() {

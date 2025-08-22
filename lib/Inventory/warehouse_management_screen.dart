@@ -4,7 +4,8 @@ import 'package:farm_assistx/Inventory/inventory_provider.dart';
 import 'package:farm_assistx/Inventory/warehouse.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:farm_assistx/Inventory/add_product_form.dart' as ext_forms;
+import 'package:farm_assistx/Inventory/edit_product_form.dart' as ext_forms;
 import 'dart:io';
 
 class WarehouseManagementScreen extends StatefulWidget {
@@ -15,24 +16,14 @@ class WarehouseManagementScreen extends StatefulWidget {
       _WarehouseManagementScreenState();
 }
 
-class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _WarehouseManagementScreenState extends State<WarehouseManagementScreen> {
   int _currentIndex = 0;
-  String _searchQuery = '';
   String _sortOption = 'Name';
   bool _showPieChartForDistribution = true; // Toggle for distribution view
-  bool _popupShown = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<InventoryProvider>(context, listen: false).loadWarehouse();
@@ -41,7 +32,6 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
@@ -49,13 +39,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
   Widget build(BuildContext context) {
     return Consumer<InventoryProvider>(
       builder: (context, inventoryProvider, child) {
+        final cs = Theme.of(context).colorScheme;
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Warehouse Asistant'),
-            backgroundColor: Colors.teal,
+            title: Text('Warehouse Assistant',
+                style: Theme.of(context).textTheme.displayMedium),
             actions: [
               IconButton(
-                icon: const Icon(Icons.refresh),
+                icon: Icon(Icons.refresh, color: cs.primary),
                 onPressed: () => inventoryProvider.loadWarehouse(),
               ),
             ],
@@ -65,7 +56,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
               : _buildBody(inventoryProvider),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddProductDialog(context),
-            backgroundColor: Colors.teal,
+            backgroundColor: cs.primary,
             child: const Icon(Icons.add),
           ),
           bottomNavigationBar: BottomNavigationBar(
@@ -83,8 +74,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
               BottomNavigationBarItem(
                   icon: Icon(Icons.analytics), label: 'Analytics'),
             ],
-            selectedItemColor: Colors.teal,
-            unselectedItemColor: Colors.grey,
+            selectedItemColor: cs.primary,
+            unselectedItemColor: cs.onSurfaceVariant,
+            backgroundColor: cs.surface,
+            elevation: 8,
           ),
         );
       },
@@ -127,35 +120,32 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         0;
     final percentage = (used / capacity * 100).clamp(0, 100);
 
+    final cs = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.lightGreen[100],
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: cs.surface,
+      shadowColor: Colors.black.withOpacity(0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Warehouse Capacity',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal)),
+            Text('Warehouse Capacity',
+                style: Theme.of(context).textTheme.displayMedium),
             const SizedBox(height: 16),
             LinearProgressIndicator(
               value: percentage / 100,
               minHeight: 20,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
+              backgroundColor: cs.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
             ),
             const SizedBox(height: 8),
             Text('$used of $capacity used',
-                style: const TextStyle(color: Colors.teal)),
+                style: TextStyle(color: cs.onSurfaceVariant)),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => _showEditCapacityDialog(context),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text('Edit Capacity'),
             ),
           ],
@@ -172,33 +162,34 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             .toList() ??
         [];
 
+    final cs = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.orange[100],
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: cs.surface,
+      shadowColor: Colors.black.withOpacity(0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Expiring Soon',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange)),
+            Text('Expiring Soon',
+                style: Theme.of(context).textTheme.displayMedium),
             const SizedBox(height: 16),
             if (expiringProducts.isEmpty)
-              const Text('No products are expiring soon.')
+              Text('No products are expiring soon.',
+                  style: TextStyle(color: cs.onSurfaceVariant))
             else
               Column(
                 children: expiringProducts.map((product) {
                   final daysLeft =
                       product.expiryDate.difference(DateTime.now()).inDays;
                   return ListTile(
+                    leading: Icon(Icons.timer_outlined, color: cs.tertiary),
                     title: Text(product.name),
                     subtitle: Text(
-                        'Expires in $daysLeft day${daysLeft > 1 ? 's' : ''}'),
+                        'Expires in $daysLeft day${daysLeft > 1 ? 's' : ''}',
+                        style: TextStyle(color: cs.onSurfaceVariant)),
                   );
                 }).toList(),
               ),
@@ -219,27 +210,24 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
       'Utilize inventory management software for efficiency.',
     ];
 
+    final cs = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.yellow[100],
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: cs.surface,
+      shadowColor: Colors.black.withOpacity(0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Quick Tips',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.brown)),
+            Text('Quick Tips',
+                style: Theme.of(context).textTheme.displayMedium),
             const SizedBox(height: 16),
             Column(
               children: tips
                   .map((tip) => ListTile(
-                        leading:
-                            const Icon(Icons.lightbulb, color: Colors.brown),
+                        leading: Icon(Icons.lightbulb, color: cs.secondary),
                         title: Text(tip),
                       ))
                   .toList(),
@@ -264,10 +252,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
               border: OutlineInputBorder(),
             ),
             onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-                inventoryProvider.setSearchQuery(value);
-              });
+              inventoryProvider.setSearchQuery(value);
             },
           ),
         ),
@@ -304,9 +289,13 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 margin:
                     const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                 child: ListTile(
+                  leading: _buildProductImage(product.image),
                   title: Text(product.name),
                   subtitle: Text(
-                      '${product.quantity} ${product.unit} · \$${product.price.toStringAsFixed(2)}'),
+                      '${product.quantity} ${product.unit} · \$${product.price.toStringAsFixed(2)}',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                   onTap: () => _showProductDetails(context, product),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -332,6 +321,41 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     );
   }
 
+  Widget _buildProductImage(String? imagePath) {
+    final double size = 48;
+    if (imagePath == null || imagePath.isEmpty) {
+      return CircleAvatar(
+        radius: size / 2,
+        backgroundColor: Colors.teal.shade50,
+        child: const Icon(Icons.inventory_2, color: Colors.teal),
+      );
+    }
+    try {
+      if (imagePath.startsWith('asset:')) {
+        final assetPath = imagePath.substring(6);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(assetPath,
+              width: size, height: size, fit: BoxFit.cover),
+        );
+      } else {
+        final file = File(imagePath);
+        if (file.existsSync()) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child:
+                Image.file(file, width: size, height: size, fit: BoxFit.cover),
+          );
+        }
+      }
+    } catch (_) {}
+    return CircleAvatar(
+      radius: size / 2,
+      backgroundColor: Colors.teal.shade50,
+      child: const Icon(Icons.inventory_2, color: Colors.teal),
+    );
+  }
+
   Widget _buildAnalyticsTab(InventoryProvider inventoryProvider) {
     final products = inventoryProvider.warehouse?.products ?? [];
     final inventoryValueByCategory =
@@ -344,6 +368,27 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     double totalValue = inventoryProvider.getTotalInventoryValue();
     int totalProducts = products.length;
     double avgPrice = totalProducts > 0 ? totalValue / totalProducts : 0;
+    // Farmer-centric metrics
+    final lowStock = products.where((p) => p.quantity <= 10).toList();
+    final expiringSoon = inventoryProvider.getExpiringProducts(days: 14);
+    final topValueProducts = [...products]
+      ..sort((a, b) => (b.price * b.quantity).compareTo(a.price * a.quantity));
+    final top3 = topValueProducts.take(3).toList();
+    final now = DateTime.now();
+    final avgShelfLifeByCategory = <String, double>{};
+    final grouped = <String, List<Product>>{};
+    for (final p in products) {
+      grouped.putIfAbsent(p.category, () => []).add(p);
+    }
+    grouped.forEach((cat, list) {
+      if (list.isNotEmpty) {
+        final avgDays = list
+                .map((p) => p.expiryDate.difference(now).inDays)
+                .fold<int>(0, (a, b) => a + b) /
+            list.length;
+        avgShelfLifeByCategory[cat] = avgDays.toDouble();
+      }
+    });
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -359,15 +404,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Analytics Dashboard',
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal),
-                ),
+                Text('Analytics Dashboard',
+                    style: Theme.of(context).textTheme.displayMedium),
                 IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.teal),
+                  icon: Icon(Icons.refresh,
+                      color: Theme.of(context).colorScheme.primary),
                   onPressed: () {
                     inventoryProvider.loadWarehouse();
                   },
@@ -382,14 +423,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.teal.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '\$${totalValue.toStringAsFixed(2)}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.teal,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
@@ -429,14 +470,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '\$${avgPrice.toStringAsFixed(2)}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.blue,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
@@ -466,8 +507,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
                                   category,
-                                  style: const TextStyle(
-                                      color: Colors.teal, fontSize: 12),
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      fontSize: 12),
                                 ),
                               );
                             }
@@ -480,8 +524,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
                             return Text('\$${value.toInt()}K',
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 10));
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 10));
                           },
                         ),
                       ),
@@ -491,7 +538,8 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                       final index = inventoryValueByCategory.keys
                           .toList()
                           .indexOf(entry.key);
-                      final color = categoryColors[entry.key] ?? Colors.teal;
+                      final color = categoryColors[entry.key] ??
+                          Theme.of(context).colorScheme.primary;
                       return BarChartGroupData(
                         x: index,
                         barRods: [
@@ -506,7 +554,9 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                             width: screenWidth * 0.06,
                             backDrawRodData: BackgroundBarChartRodData(
                               show: true,
-                              color: Colors.grey[200]!,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
                             ),
                           ),
                         ],
@@ -521,16 +571,13 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Category Distribution',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal),
-                ),
+                Text('Category Distribution',
+                    style: Theme.of(context).textTheme.displayMedium),
                 Row(
                   children: [
-                    const Text('Bar', style: TextStyle(color: Colors.teal)),
+                    Text('Bar',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface)),
                     Switch(
                       value: _showPieChartForDistribution,
                       onChanged: (value) {
@@ -538,9 +585,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                           _showPieChartForDistribution = value;
                         });
                       },
-                      activeColor: Colors.teal,
+                      activeColor: Theme.of(context).colorScheme.primary,
                     ),
-                    const Text('Pie', style: TextStyle(color: Colors.teal)),
+                    Text('Pie',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface)),
                   ],
                 )
               ],
@@ -580,8 +629,8 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                           ),
                           sections:
                               inventoryValueByCategory.entries.map((entry) {
-                            final color =
-                                categoryColors[entry.key] ?? Colors.teal;
+                            final color = categoryColors[entry.key] ??
+                                Theme.of(context).colorScheme.primary;
                             return PieChartSectionData(
                               value: entry.value.toDouble(),
                               title:
@@ -620,8 +669,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         category,
-                                        style: const TextStyle(
-                                            color: Colors.teal, fontSize: 12),
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                            fontSize: 12),
                                       ),
                                     );
                                   }
@@ -635,8 +687,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                                 getTitlesWidget: (value, meta) {
                                   return Text(
                                     '\$${value.toInt()}K',
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 10),
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                        fontSize: 10),
                                   );
                                 },
                               ),
@@ -648,8 +703,8 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                             final idx = inventoryValueByCategory.keys
                                 .toList()
                                 .indexOf(entry.key);
-                            final color =
-                                categoryColors[entry.key] ?? Colors.teal;
+                            final color = categoryColors[entry.key] ??
+                                Theme.of(context).colorScheme.primary;
                             return BarChartGroupData(
                               x: idx,
                               barRods: [
@@ -664,7 +719,9 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                                   width: screenWidth * 0.06,
                                   backDrawRodData: BackgroundBarChartRodData(
                                     show: true,
-                                    color: Colors.grey[200]!,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest,
                                   ),
                                 ),
                               ],
@@ -682,18 +739,115 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '$totalProducts Products',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.purple,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
               ),
+            ),
+            const SizedBox(height: 24),
+            // Low stock alerts
+            _buildAnalyticsCard(
+              title: 'Low Stock Alerts (<=10)',
+              child: lowStock.isEmpty
+                  ? const Text('All good. No low stock items.')
+                  : Column(
+                      children: lowStock
+                          .map((p) => ListTile(
+                                leading: _buildProductImage(p.image),
+                                title: Text(p.name),
+                                subtitle: Text(
+                                    'Qty: ${p.quantity} ${p.unit} · ${p.category}',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant)),
+                              ))
+                          .toList(),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            // Expiring soon list
+            _buildAnalyticsCard(
+              title: 'Expiring in 14 days',
+              child: expiringSoon.isEmpty
+                  ? const Text('No items expiring soon.')
+                  : Column(
+                      children: expiringSoon
+                          .map((p) => ListTile(
+                                leading: const Icon(Icons.warning_amber,
+                                    color: Colors.orange),
+                                title: Text(p.name),
+                                subtitle: Text(
+                                    'Expires ${DateFormat.yMMMd().format(p.expiryDate)} · ${p.category}'),
+                              ))
+                          .toList(),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            // Top value items
+            _buildAnalyticsCard(
+              title: 'Top Value Items',
+              child: top3.isEmpty
+                  ? const Text('No data yet.')
+                  : Column(
+                      children: top3
+                          .map((p) => ListTile(
+                                leading: _buildProductImage(p.image),
+                                title: Text(p.name),
+                                subtitle: Text(p.category),
+                                trailing: Text(
+                                    '\$${(p.price * p.quantity).toStringAsFixed(2)}'),
+                              ))
+                          .toList(),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            // Average shelf life by category
+            _buildAnalyticsCard(
+              title: 'Avg Shelf-life by Category (days)',
+              child: avgShelfLifeByCategory.isEmpty
+                  ? const Text('No data yet.')
+                  : Column(
+                      children: avgShelfLifeByCategory.entries
+                          .map((e) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 6.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Text(e.key,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600))),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      flex: 3,
+                                      child: LinearProgressIndicator(
+                                        value: (e.value / 60).clamp(0, 1),
+                                        minHeight: 10,
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        valueColor: AlwaysStoppedAnimation(
+                                            Theme.of(context)
+                                                .colorScheme
+                                                .primary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(e.value.toStringAsFixed(0)),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
             ),
           ],
         ),
@@ -702,11 +856,12 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
   }
 
   Widget _buildAnalyticsCard({required String title, required Widget child}) {
+    final cs = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white,
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: cs.surface,
+      shadowColor: Colors.black.withOpacity(0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -715,10 +870,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             if (title.isNotEmpty)
               Text(
                 title,
-                style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal),
+                style: Theme.of(context).textTheme.displayMedium,
               ),
             if (title.isNotEmpty) const SizedBox(height: 16),
             child,
@@ -728,31 +880,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     );
   }
 
-  List<FlSpot> _generateTrendData(List<Product> products) {
-    // Mock data for trends, replace with actual data as needed
-    return [
-      const FlSpot(0, 50),
-      const FlSpot(1, 80),
-      const FlSpot(2, 70),
-      const FlSpot(3, 90),
-      const FlSpot(4, 100),
-    ];
-  }
-
-  List<RadarEntry> _generateCategoryComparisonData(
-      Map<String, double> inventoryValueByCategory) {
-    // Ensure at least three entries for the radar chart
-    List<RadarEntry> entries = inventoryValueByCategory.entries.map((entry) {
-      return RadarEntry(value: entry.value);
-    }).toList();
-
-    // Add dummy entries if less than three
-    while (entries.length < 3) {
-      entries.add(const RadarEntry(value: 0)); // Add a zero entry
-    }
-
-    return entries;
-  }
+  // Additional farmer-centric analytics widgets are defined inline in the build.
 
   Map<String, Color> _generateCategoryColors(List<String> categories) {
     // Generate a color map for categories
@@ -773,7 +901,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         return AlertDialog(
           title: const Text('Add New Product'),
           content: SingleChildScrollView(
-            child: AddProductForm(),
+            child: ext_forms.AddProductForm(),
           ),
         );
       },
@@ -791,27 +919,20 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.black,
           title: const Text(
             'Edit Inventory Capacity',
-            style: TextStyle(color: Colors.white),
           ),
           content: TextField(
             controller: _capacityController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Enter new capacity',
-              labelStyle: TextStyle(color: Colors.white),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white),
-              ),
             ),
-            style: const TextStyle(color: Colors.white),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.blue)),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -823,7 +944,6 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                   Navigator.pop(context);
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text('Enter'),
             ),
           ],
@@ -841,6 +961,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: _buildProductImage(product.image),
+              ),
               Text('Category: ${product.category}'),
               Text('Quantity: ${product.quantity} ${product.unit}'),
               Text('Price: \$${product.price.toStringAsFixed(2)}'),
@@ -867,7 +991,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         return AlertDialog(
           title: const Text('Edit Product'),
           content: SingleChildScrollView(
-            child: EditProductForm(product: product, index: index),
+            child: ext_forms.EditProductForm(product: product, index: index),
           ),
         );
       },
@@ -939,429 +1063,4 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
 // Below are the AddProductForm and EditProductForm widgets (in the same file)
 
-class AddProductForm extends StatefulWidget {
-  const AddProductForm({super.key});
-
-  @override
-  _AddProductFormState createState() => _AddProductFormState();
-}
-
-class _AddProductFormState extends State<AddProductForm> {
-  final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  String _category = '';
-  int _quantity = 0;
-  String _unit = '';
-  double _price = 0.0;
-  DateTime _expiryDate = DateTime.now().add(const Duration(days: 30));
-  String? _image; // Variable to hold the selected image path
-
-  @override
-  Widget build(BuildContext context) {
-    final inventoryProvider = Provider.of<InventoryProvider>(context);
-    final categories = inventoryProvider.getCategories();
-
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Product Name',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) =>
-                value!.isEmpty ? 'Please enter product name' : null,
-            onSaved: (value) => _name = value!,
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(
-              labelText: 'Category',
-              border: OutlineInputBorder(),
-            ),
-            items: categories.map((String category) {
-              return DropdownMenuItem<String>(
-                value: category,
-                child: Text(category),
-              );
-            }).toList()
-              ..add(
-                const DropdownMenuItem(
-                  value: 'add_new',
-                  child: Text('Add New Category'),
-                ),
-              ),
-            onChanged: (value) {
-              if (value == 'add_new') {
-                _showAddCategoryDialog();
-              } else {
-                setState(() {
-                  _category = value!;
-                });
-              }
-            },
-            validator: (value) => value == null || value.isEmpty
-                ? 'Please select a category'
-                : null,
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Quantity',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-            validator: (value) => int.tryParse(value!) == null
-                ? 'Please enter a valid number'
-                : null,
-            onSaved: (value) => _quantity = int.parse(value!),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Unit',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) => value!.isEmpty ? 'Please enter unit' : null,
-            onSaved: (value) => _unit = value!,
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Price',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-            validator: (value) => double.tryParse(value!) == null
-                ? 'Please enter a valid number'
-                : null,
-            onSaved: (value) => _price = double.parse(value!),
-          ),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _expiryDate,
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-              );
-              if (picked != null) {
-                setState(() {
-                  _expiryDate = picked;
-                });
-              }
-            },
-            child: InputDecorator(
-              decoration: const InputDecoration(
-                labelText: 'Expiry Date',
-                border: OutlineInputBorder(),
-              ),
-              child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate)),
-            ),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () async {
-              final pickedImage =
-                  await ImagePicker().pickImage(source: ImageSource.gallery);
-              if (pickedImage != null) {
-                setState(() {
-                  _image = pickedImage.path;
-                });
-              }
-            },
-            child: const Text('Select Product Image'),
-          ),
-          if (_image != null) ...[
-            const SizedBox(height: 10),
-            Text('Selected Image: ${_image!.split('/').last}'),
-          ],
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                final newProduct = Product(
-                  name: _name,
-                  category: _category,
-                  quantity: _quantity,
-                  unit: _unit,
-                  price: _price,
-                  expiryDate: _expiryDate,
-                  image: _image,
-                );
-                inventoryProvider.addProduct(newProduct);
-                Navigator.of(context).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-            child: const Text('Add Product'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddCategoryDialog() {
-    String newCategory = '';
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text('Add New Category',
-              style: TextStyle(color: Colors.black)),
-          content: TextField(
-            style: const TextStyle(color: Colors.black),
-            decoration: const InputDecoration(
-              labelText: 'Category Name',
-              labelStyle: TextStyle(color: Colors.black),
-            ),
-            onChanged: (value) {
-              newCategory = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel', style: TextStyle(color: Colors.blue)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Add', style: TextStyle(color: Colors.blue)),
-              onPressed: () {
-                if (newCategory.isNotEmpty) {
-                  Provider.of<InventoryProvider>(context, listen: false)
-                      .addCategory(newCategory);
-                  setState(() {
-                    _category = newCategory;
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class EditProductForm extends StatefulWidget {
-  final Product product;
-  final int index;
-
-  const EditProductForm(
-      {super.key, required this.product, required this.index});
-
-  @override
-  _EditProductFormState createState() => _EditProductFormState();
-}
-
-class _EditProductFormState extends State<EditProductForm> {
-  final _formKey = GlobalKey<FormState>();
-  late String _name;
-  late String _category;
-  late int _quantity;
-  late String _unit;
-  late double _price;
-  late DateTime _expiryDate;
-  String? _image;
-
-  @override
-  void initState() {
-    super.initState();
-    _name = widget.product.name;
-    _category = widget.product.category;
-    _quantity = widget.product.quantity;
-    _unit = widget.product.unit;
-    _price = widget.product.price;
-    _expiryDate = widget.product.expiryDate;
-    _image = widget.product.image;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final inventoryProvider = Provider.of<InventoryProvider>(context);
-    final categories = inventoryProvider.getCategories();
-
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            initialValue: _name,
-            decoration: const InputDecoration(
-                labelText: 'Name', border: OutlineInputBorder()),
-            validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
-            onSaved: (value) => _name = value!,
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(
-                labelText: 'Category', border: OutlineInputBorder()),
-            value: _category,
-            items: [
-              ...categories.map((category) {
-                return DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(category),
-                );
-              }),
-              const DropdownMenuItem<String>(
-                value: 'add_new',
-                child: Text('Add New Category'),
-              ),
-            ],
-            onChanged: (value) {
-              if (value == 'add_new') {
-                _showAddCategoryDialog();
-              } else {
-                setState(() {
-                  _category = value!;
-                });
-              }
-            },
-            validator: (value) =>
-                value == null ? 'Please select a category' : null,
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            initialValue: _quantity.toString(),
-            decoration: const InputDecoration(
-                labelText: 'Quantity', border: OutlineInputBorder()),
-            keyboardType: TextInputType.number,
-            validator: (value) => int.tryParse(value!) == null
-                ? 'Please enter a valid number'
-                : null,
-            onSaved: (value) => _quantity = int.parse(value!),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            initialValue: _unit,
-            decoration: const InputDecoration(
-                labelText: 'Unit', border: OutlineInputBorder()),
-            validator: (value) => value!.isEmpty ? 'Please enter a unit' : null,
-            onSaved: (value) => _unit = value!,
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            initialValue: _price.toString(),
-            decoration: const InputDecoration(
-                labelText: 'Price', border: OutlineInputBorder()),
-            keyboardType: TextInputType.number,
-            validator: (value) => double.tryParse(value!) == null
-                ? 'Please enter a valid number'
-                : null,
-            onSaved: (value) => _price = double.parse(value!),
-          ),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _expiryDate,
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-              );
-              if (picked != null) {
-                setState(() {
-                  _expiryDate = picked;
-                });
-              }
-            },
-            child: InputDecorator(
-              decoration: const InputDecoration(
-                  labelText: 'Expiry Date', border: OutlineInputBorder()),
-              child: Text(DateFormat('yyyy-MM-dd').format(_expiryDate)),
-            ),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () async {
-              final pickedImage =
-                  await ImagePicker().pickImage(source: ImageSource.gallery);
-              if (pickedImage != null) {
-                setState(() {
-                  _image = pickedImage.path;
-                });
-              }
-            },
-            child: const Text('Select Product Image'),
-          ),
-          if (_image != null) ...[
-            const SizedBox(height: 10),
-            Text('Selected Image: ${_image!.split('/').last}'),
-          ],
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                final updatedProduct = Product(
-                  name: _name,
-                  category: _category,
-                  quantity: _quantity,
-                  unit: _unit,
-                  price: _price,
-                  expiryDate: _expiryDate,
-                  image: _image,
-                );
-                inventoryProvider.updateProduct(widget.index, updatedProduct);
-                Navigator.of(context).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-            child: const Text('Update Product'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddCategoryDialog() {
-    String newCategory = '';
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white, // Light background for dark text
-          title: const Text('Add New Category',
-              style: TextStyle(color: Colors.black)),
-          content: TextField(
-            style: const TextStyle(color: Colors.black),
-            decoration: const InputDecoration(
-              labelText: 'Category Name',
-              labelStyle: TextStyle(color: Colors.black),
-            ),
-            onChanged: (value) {
-              newCategory = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel', style: TextStyle(color: Colors.blue)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Add', style: TextStyle(color: Colors.blue)),
-              onPressed: () {
-                if (newCategory.isNotEmpty) {
-                  Provider.of<InventoryProvider>(context, listen: false)
-                      .addCategory(newCategory);
-                  setState(() {
-                    _category = newCategory;
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+// removed inline form widgets; using external files
