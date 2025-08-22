@@ -16,16 +16,17 @@ class WarehouseManagementScreen extends StatefulWidget {
 }
 
 class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   int _currentIndex = 0;
   String _sortOption = 'Name';
-  bool _showPieChartForDistribution = true; // Toggle for distribution view
+  bool _showPieChartForDistribution = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    // Reserved for future animation setup if needed
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<InventoryProvider>(context, listen: false);
       provider.loadWarehouse().then((_) => provider.seedDummyDataIfEmpty());
@@ -34,17 +35,30 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final scheme = Theme.of(context).colorScheme;
     return Consumer<InventoryProvider>(
       builder: (context, inventoryProvider, child) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Warehouse Asistant'),
+            title: const Text('Warehouse Assistant'),
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           ),
           body: inventoryProvider.isLoading
               ? const Center(child: CircularProgressIndicator())
-              : _buildBody(inventoryProvider),
+              : IndexedStack(
+                  index: _currentIndex,
+                  children: [
+                    _buildOverviewTab(inventoryProvider),
+                    _buildProductListTab(inventoryProvider),
+                    _OptimizedAnalyticsTab(
+                      inventoryProvider: inventoryProvider,
+                      showPieChart: _showPieChartForDistribution,
+                      onToggleChart: (value) =>
+                          setState(() => _showPieChartForDistribution = value),
+                    ),
+                  ],
+                ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddProductDialog(context),
             backgroundColor: scheme.primary,
@@ -69,19 +83,6 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         );
       },
     );
-  }
-
-  Widget _buildBody(InventoryProvider inventoryProvider) {
-    switch (_currentIndex) {
-      case 0:
-        return _buildOverviewTab(inventoryProvider);
-      case 1:
-        return _buildProductListTab(inventoryProvider);
-      case 2:
-        return _buildAnalyticsTab(inventoryProvider);
-      default:
-        return Container();
-    }
   }
 
   Widget _buildOverviewTab(InventoryProvider inventoryProvider) {
@@ -109,10 +110,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
     final scheme = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: scheme.primaryContainer,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -158,10 +159,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
     final scheme = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: scheme.errorContainer,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -206,10 +207,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 
     final scheme = Theme.of(context).colorScheme;
     return Card(
-      elevation: 8,
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: scheme.secondaryContainer,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -320,691 +321,6 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     );
   }
 
-  Widget _buildAnalyticsTab(InventoryProvider inventoryProvider) {
-    final products = inventoryProvider.warehouse?.products ?? [];
-    final inventoryValueByCategory =
-        inventoryProvider.getInventoryValueByCategory();
-    final categoryColors =
-        _generateCategoryColors(inventoryValueByCategory.keys.toList());
-    final screenWidth = MediaQuery.of(context).size.width;
-    final Map<String, int> quantityByCategory = {};
-    for (final p in products) {
-      quantityByCategory[p.category] =
-          (quantityByCategory[p.category] ?? 0) + p.quantity;
-    }
-    final lowStock = products.where((p) => p.quantity <= 10).toList()
-      ..sort((a, b) => a.quantity.compareTo(b.quantity));
-    final expiring7Days = products
-        .where((p) =>
-            p.expiryDate.isAfter(DateTime.now()) &&
-            p.expiryDate.difference(DateTime.now()).inDays <= 7)
-        .toList();
-    final topValuable = [...products]
-      ..sort((a, b) => (b.price * b.quantity).compareTo(a.price * a.quantity));
-
-    // Additional metrics
-    double totalValue = inventoryProvider.getTotalInventoryValue();
-    int totalProducts = products.length;
-    double avgPrice = totalProducts > 0 ? totalValue / totalProducts : 0;
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await inventoryProvider.loadWarehouse();
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Analytics Dashboard',
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary),
-                ),
-                IconButton(
-                  icon: Icon(Icons.refresh,
-                      color: Theme.of(context).colorScheme.primary),
-                  onPressed: () {
-                    inventoryProvider.loadWarehouse();
-                  },
-                )
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Total Inventory Value card
-            _buildAnalyticsCard(
-              title: 'Total Inventory Value',
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '\$${totalValue.toStringAsFixed(2)}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Warehouse Capacity Utilization card
-            _buildAnalyticsCard(
-              title: 'Warehouse Capacity Utilization',
-              child: Column(
-                children: [
-                  Text(
-                    '${inventoryProvider.getCapacityUtilizationPercentage().toStringAsFixed(1)}%',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  LinearProgressIndicator(
-                    value:
-                        inventoryProvider.getCapacityUtilizationPercentage() /
-                            100,
-                    minHeight: 12,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Average Product Price card
-            _buildAnalyticsCard(
-              title: 'Average Product Price',
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '\$${avgPrice.toStringAsFixed(2)}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Inventory Value by Category - Bar Chart
-            _buildAnalyticsCard(
-              title: 'Inventory Value by Category',
-              child: SizedBox(
-                height: screenWidth * 0.8,
-                child: BarChart(
-                  BarChartData(
-                    barTouchData: BarTouchData(
-                      enabled: true,
-                      touchTooltipData: BarTouchTooltipData(
-                        tooltipRoundedRadius: 8,
-                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          final key = inventoryValueByCategory.keys
-                              .elementAt(group.x.toInt());
-                          return BarTooltipItem(
-                            '$key\n',
-                            TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '\$${rod.toY.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: 1,
-                      getDrawingHorizontalLine: (value) => FlLine(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            final index = value.toInt();
-                            if (index >= 0 &&
-                                index < inventoryValueByCategory.keys.length) {
-                              final category = inventoryValueByCategory.keys
-                                  .elementAt(index);
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  _abbr(category),
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              );
-                            }
-                            return const SizedBox();
-                          },
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            return Text(
-                              '\$${value.toInt()}K',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                                fontSize: 10,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    groupsSpace: 18,
-                    maxY: (() {
-                      if (inventoryValueByCategory.isEmpty) return 0.0;
-                      final maxVal = inventoryValueByCategory.values
-                          .reduce((a, b) => a > b ? a : b);
-                      return (maxVal * 1.2).toDouble();
-                    })(),
-                    barGroups: inventoryValueByCategory.entries.map((entry) {
-                      final index = inventoryValueByCategory.keys
-                          .toList()
-                          .indexOf(entry.key);
-                      final color = categoryColors[entry.key] ??
-                          Theme.of(context).colorScheme.primary;
-                      return BarChartGroupData(
-                        x: index,
-                        barRods: [
-                          BarChartRodData(
-                            toY: entry.value,
-                            gradient: LinearGradient(
-                              colors: [
-                                color.withValues(alpha: 0.9),
-                                color.withValues(alpha: 0.6),
-                              ],
-                            ),
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(6)),
-                            width: screenWidth * 0.06,
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Quantity by Category - Bar Chart
-            _buildAnalyticsCard(
-              title: 'Quantity by Category',
-              child: SizedBox(
-                height: screenWidth * 0.8,
-                child: BarChart(
-                  BarChartData(
-                    barTouchData: BarTouchData(
-                      enabled: true,
-                      touchTooltipData: BarTouchTooltipData(
-                        tooltipRoundedRadius: 8,
-                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          final key = quantityByCategory.keys
-                              .elementAt(group.x.toInt());
-                          return BarTooltipItem(
-                            '$key\n',
-                            TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: rod.toY.toStringAsFixed(0),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: 1,
-                      getDrawingHorizontalLine: (value) => FlLine(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            final index = value.toInt();
-                            final keys = quantityByCategory.keys.toList();
-                            if (index >= 0 && index < keys.length) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  _abbr(keys[index]),
-                                  style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      fontSize: 12),
-                                ),
-                              );
-                            }
-                            return const SizedBox();
-                          },
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) => Text(
-                            value.toInt().toString(),
-                            style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                                fontSize: 10),
-                          ),
-                        ),
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    groupsSpace: 18,
-                    maxY: (() {
-                      if (quantityByCategory.isEmpty) return 0.0;
-                      final maxVal = quantityByCategory.values
-                          .reduce((a, b) => a > b ? a : b)
-                          .toDouble();
-                      return (maxVal * 1.2).toDouble();
-                    })(),
-                    barGroups: quantityByCategory.entries.map((entry) {
-                      final idx =
-                          quantityByCategory.keys.toList().indexOf(entry.key);
-                      final color = categoryColors[entry.key] ??
-                          Theme.of(context).colorScheme.primary;
-                      return BarChartGroupData(
-                        x: idx,
-                        barRods: [
-                          BarChartRodData(
-                            toY: entry.value.toDouble(),
-                            gradient: LinearGradient(colors: [
-                              color.withValues(alpha: 0.9),
-                              color.withValues(alpha: 0.6),
-                            ]),
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(6)),
-                            width: screenWidth * 0.06,
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Low Stock Items
-            _buildAnalyticsCard(
-              title: 'Low Stock Items (≤ 10)',
-              child: lowStock.isEmpty
-                  ? const Text('No low stock items')
-                  : Column(
-                      children: lowStock.take(5).map((p) {
-                        return ListTile(
-                          leading: _buildProductAvatar(p.image),
-                          title: Text(p.name),
-                          subtitle: Text(
-                              'Qty: ${p.quantity} ${p.unit} · ${p.category}'),
-                        );
-                      }).toList(),
-                    ),
-            ),
-            const SizedBox(height: 24),
-            // Expiring within 7 days
-            _buildAnalyticsCard(
-              title: 'Expiring within 7 days',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${expiring7Days.length} product(s)'),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: expiring7Days.take(12).map((p) {
-                      final days =
-                          p.expiryDate.difference(DateTime.now()).inDays;
-                      return Chip(
-                        label: Text('${p.name} • ${days}d'),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.errorContainer,
-                        labelStyle: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer),
-                      );
-                    }).toList(),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Top Valuable Products
-            _buildAnalyticsCard(
-              title: 'Top Valuable Products',
-              child: Column(
-                children: topValuable.take(5).map((p) {
-                  final value = (p.price * p.quantity);
-                  return ListTile(
-                    leading: _buildProductAvatar(p.image),
-                    title: Text(p.name),
-                    subtitle: Text(p.category),
-                    trailing: Text('\$${value.toStringAsFixed(2)}'),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Category Distribution (Pie vs. Bar toggle)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Category Distribution',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary),
-                ),
-                Row(
-                  children: [
-                    Text('Bar',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary)),
-                    Switch(
-                      value: _showPieChartForDistribution,
-                      onChanged: (value) {
-                        setState(() {
-                          _showPieChartForDistribution = value;
-                        });
-                      },
-                      activeColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    Text('Pie',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary)),
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildAnalyticsCard(
-              title: '',
-              child: _showPieChartForDistribution
-                  ? SizedBox(
-                      height: screenWidth * 0.8,
-                      child: PieChart(
-                        PieChartData(
-                          pieTouchData: PieTouchData(
-                            touchCallback: (FlTouchEvent event,
-                                PieTouchResponse? response) {
-                              if (!event.isInterestedForInteractions ||
-                                  response == null ||
-                                  response.touchedSection == null) return;
-                              if (event is FlTapUpEvent) {
-                                final touchedIndex = response
-                                    .touchedSection!.touchedSectionIndex;
-                                if (touchedIndex <
-                                    inventoryValueByCategory.keys.length) {
-                                  final category = inventoryValueByCategory.keys
-                                      .elementAt(touchedIndex);
-                                  final productsUnderCategory =
-                                      inventoryProvider.warehouse?.products
-                                              .where(
-                                                  (p) => p.category == category)
-                                              .toList() ??
-                                          [];
-                                  _showProductsUnderCategoryDialog(
-                                      context, category, productsUnderCategory);
-                                }
-                              }
-                            },
-                          ),
-                          sections:
-                              inventoryValueByCategory.entries.map((entry) {
-                            final color =
-                                categoryColors[entry.key] ?? Colors.teal;
-                            return PieChartSectionData(
-                              value: entry.value.toDouble(),
-                              title:
-                                  '${entry.key}\n\$${entry.value.toStringAsFixed(0)}',
-                              color: color,
-                              radius: screenWidth * 0.2,
-                              titleStyle: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    )
-                  : SizedBox(
-                      height: screenWidth * 0.8,
-                      child: BarChart(
-                        BarChartData(
-                          barTouchData: BarTouchData(enabled: true),
-                          gridData: FlGridData(show: true),
-                          titlesData: FlTitlesData(
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, meta) {
-                                  final index = value.toInt();
-                                  if (index >= 0 &&
-                                      index <
-                                          inventoryValueByCategory
-                                              .keys.length) {
-                                    final category = inventoryValueByCategory
-                                        .keys
-                                        .elementAt(index);
-                                    return Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        category,
-                                        style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            fontSize: 12),
-                                      ),
-                                    );
-                                  }
-                                  return const SizedBox();
-                                },
-                              ),
-                            ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, meta) {
-                                  return Text(
-                                    '\$${value.toInt()}K',
-                                    style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                        fontSize: 10),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          borderData: FlBorderData(show: false),
-                          barGroups:
-                              inventoryValueByCategory.entries.map((entry) {
-                            final idx = inventoryValueByCategory.keys
-                                .toList()
-                                .indexOf(entry.key);
-                            final color = categoryColors[entry.key] ??
-                                Theme.of(context).colorScheme.primary;
-                            return BarChartGroupData(
-                              x: idx,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: entry.value,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      color.withValues(alpha: 0.9),
-                                      color.withValues(alpha: 0.6),
-                                    ],
-                                  ),
-                                  borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(6)),
-                                  width: screenWidth * 0.06,
-                                  backDrawRodData: BackgroundBarChartRodData(
-                                    show: true,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest,
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 24),
-            // Total Products Count card
-            _buildAnalyticsCard(
-              title: 'Total Products Count',
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '$totalProducts Products',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _abbr(String input) {
-    if (input.length <= 10) return input;
-    // Keep first 9 chars + ellipsis for compact x-axis labels
-    return '${input.substring(0, 9)}…';
-  }
-
-  Widget _buildAnalyticsCard({required String title, required Widget child}) {
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Theme.of(context).colorScheme.surface,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (title.isNotEmpty)
-              Text(
-                title,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary),
-              ),
-            if (title.isNotEmpty) const SizedBox(height: 16),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Removed unused helpers
-
-  Map<String, Color> _generateCategoryColors(List<String> categories) {
-    // Generate a color map for categories
-    return {
-      'Fruits': Colors.red,
-      'Vegetables': Colors.green,
-      'Dairy': Colors.blue,
-      'Grains': Colors.brown,
-      'Meat': Colors.orange,
-      'Beverages': Colors.purple,
-    };
-  }
-
   void _showAddProductDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -1023,7 +339,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     final inventoryProvider =
         Provider.of<InventoryProvider>(context, listen: false);
     final currentCapacity = inventoryProvider.warehouse?.capacity ?? 0;
-    final TextEditingController _capacityController =
+    final TextEditingController capacityController =
         TextEditingController(text: currentCapacity.toString());
 
     showDialog(
@@ -1036,7 +352,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             style: TextStyle(color: Colors.white),
           ),
           content: TextField(
-            controller: _capacityController,
+            controller: capacityController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Enter new capacity',
@@ -1054,7 +370,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             ),
             ElevatedButton(
               onPressed: () {
-                final int? newCapacity = int.tryParse(_capacityController.text);
+                final int? newCapacity = int.tryParse(capacityController.text);
                 if (newCapacity != null &&
                     inventoryProvider.warehouse != null) {
                   inventoryProvider.warehouse!.capacity = newCapacity;
@@ -1138,6 +454,388 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
       },
     );
   }
+}
+
+// Optimized Analytics Tab as a separate StatefulWidget
+class _OptimizedAnalyticsTab extends StatefulWidget {
+  final InventoryProvider inventoryProvider;
+  final bool showPieChart;
+  final ValueChanged<bool> onToggleChart;
+
+  const _OptimizedAnalyticsTab({
+    required this.inventoryProvider,
+    required this.showPieChart,
+    required this.onToggleChart,
+  });
+
+  @override
+  _OptimizedAnalyticsTabState createState() => _OptimizedAnalyticsTabState();
+}
+
+class _OptimizedAnalyticsTabState extends State<_OptimizedAnalyticsTab>
+    with AutomaticKeepAliveClientMixin {
+  // Cache for expensive computations
+  Map<String, double>? _cachedInventoryValueByCategory;
+  Map<String, int>? _cachedQuantityByCategory;
+  List<Product>? _cachedLowStock;
+  List<Product>? _cachedExpiring7Days;
+  List<Product>? _cachedTopValuable;
+  Map<String, Color>? _cachedCategoryColors;
+  double? _cachedTotalValue;
+  int? _cachedTotalProducts;
+  double? _cachedAvgPrice;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  void _computeAnalytics() {
+    final products = widget.inventoryProvider.warehouse?.products ?? [];
+
+    if (_cachedInventoryValueByCategory == null) {
+      _cachedInventoryValueByCategory =
+          widget.inventoryProvider.getInventoryValueByCategory();
+      _cachedCategoryColors = _generateCategoryColors(
+          _cachedInventoryValueByCategory!.keys.toList());
+    }
+
+    if (_cachedQuantityByCategory == null) {
+      _cachedQuantityByCategory = {};
+      for (final p in products) {
+        _cachedQuantityByCategory![p.category] =
+            (_cachedQuantityByCategory![p.category] ?? 0) + p.quantity;
+      }
+    }
+
+    if (_cachedLowStock == null) {
+      _cachedLowStock = products.where((p) => p.quantity <= 10).toList()
+        ..sort((a, b) => a.quantity.compareTo(b.quantity));
+    }
+
+    if (_cachedExpiring7Days == null) {
+      _cachedExpiring7Days = products
+          .where((p) =>
+              p.expiryDate.isAfter(DateTime.now()) &&
+              p.expiryDate.difference(DateTime.now()).inDays <= 7)
+          .toList();
+    }
+
+    if (_cachedTopValuable == null) {
+      _cachedTopValuable = [...products]
+        ..sort((a, b) => (b.price * b.quantity).compareTo(a.price * a.quantity));
+    }
+
+    if (_cachedTotalValue == null) {
+      _cachedTotalValue = widget.inventoryProvider.getTotalInventoryValue();
+    }
+
+    if (_cachedTotalProducts == null) {
+      _cachedTotalProducts = products.length;
+    }
+
+    if (_cachedAvgPrice == null) {
+      _cachedAvgPrice = _cachedTotalProducts! > 0
+          ? _cachedTotalValue! / _cachedTotalProducts!
+          : 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    _computeAnalytics();
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Clear cache on refresh
+        _cachedInventoryValueByCategory = null;
+        _cachedQuantityByCategory = null;
+        _cachedLowStock = null;
+        _cachedExpiring7Days = null;
+        _cachedTopValuable = null;
+        _cachedCategoryColors = null;
+        _cachedTotalValue = null;
+        _cachedTotalProducts = null;
+        _cachedAvgPrice = null;
+
+        await widget.inventoryProvider.loadWarehouse();
+        setState(() {});
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 16),
+            _buildMetricsRow(),
+            const SizedBox(height: 24),
+            _OptimizedBarChart(
+              title: 'Inventory Value by Category',
+              data: _cachedInventoryValueByCategory!,
+              colors: _cachedCategoryColors!,
+              isValueChart: true,
+            ),
+            const SizedBox(height: 24),
+            _OptimizedBarChart(
+              title: 'Quantity by Category',
+              data: _cachedQuantityByCategory!
+                  .map((k, v) => MapEntry(k, v.toDouble())),
+              colors: _cachedCategoryColors!,
+              isValueChart: false,
+            ),
+            const SizedBox(height: 24),
+            _buildLowStockSection(),
+            const SizedBox(height: 24),
+            _buildExpiringSection(),
+            const SizedBox(height: 24),
+            _buildTopValuableSection(),
+            const SizedBox(height: 24),
+            _buildCategoryDistributionToggle(),
+            const SizedBox(height: 16),
+            _buildCategoryDistributionChart(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Analytics Dashboard',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary),
+        ),
+        IconButton(
+          icon:
+              Icon(Icons.refresh, color: Theme.of(context).colorScheme.primary),
+          onPressed: () {
+            // Clear cache and reload
+            _cachedInventoryValueByCategory = null;
+            _cachedQuantityByCategory = null;
+            _cachedLowStock = null;
+            _cachedExpiring7Days = null;
+            _cachedTopValuable = null;
+            _cachedCategoryColors = null;
+            _cachedTotalValue = null;
+            _cachedTotalProducts = null;
+            _cachedAvgPrice = null;
+
+            widget.inventoryProvider.loadWarehouse();
+            setState(() {});
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _buildMetricsRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildAnalyticsCard(
+            title: 'Total Value',
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '\$${_cachedTotalValue!.toStringAsFixed(2)}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildAnalyticsCard(
+            title: 'Avg Price',
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '\$${_cachedAvgPrice!.toStringAsFixed(2)}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLowStockSection() {
+    return _buildAnalyticsCard(
+      title: 'Low Stock Items (≤ 10)',
+      child: _cachedLowStock!.isEmpty
+          ? const Text('No low stock items')
+          : Column(
+              children: _cachedLowStock!.take(5).map((p) {
+                return ListTile(
+                  leading: _buildProductAvatar(p.image),
+                  title: Text(p.name),
+                  subtitle:
+                      Text('Qty: ${p.quantity} ${p.unit} · ${p.category}'),
+                );
+              }).toList(),
+            ),
+    );
+  }
+
+  Widget _buildExpiringSection() {
+    return _buildAnalyticsCard(
+      title: 'Expiring within 7 days',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${_cachedExpiring7Days!.length} product(s)'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _cachedExpiring7Days!.take(12).map((p) {
+              final days = p.expiryDate.difference(DateTime.now()).inDays;
+              return Chip(
+                label: Text('${p.name} • ${days}d'),
+                backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                labelStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer),
+              );
+            }).toList(),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopValuableSection() {
+    return _buildAnalyticsCard(
+      title: 'Top Valuable Products',
+      child: Column(
+        children: _cachedTopValuable!.take(5).map((p) {
+          final value = (p.price * p.quantity);
+          return ListTile(
+            leading: _buildProductAvatar(p.image),
+            title: Text(p.name),
+            subtitle: Text(p.category),
+            trailing: Text('\$${value.toStringAsFixed(2)}'),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildCategoryDistributionToggle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Category Distribution',
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary),
+        ),
+        Row(
+          children: [
+            Text('Bar',
+                style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            Switch(
+              value: widget.showPieChart,
+              onChanged: widget.onToggleChart,
+              activeColor: Theme.of(context).colorScheme.primary,
+            ),
+            Text('Pie',
+                style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _buildCategoryDistributionChart() {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return _buildAnalyticsCard(
+      title: '',
+      child: widget.showPieChart
+          ? _OptimizedPieChart(
+              data: _cachedInventoryValueByCategory!,
+              colors: _cachedCategoryColors!,
+              screenWidth: screenWidth,
+              onSectionTap: (category) {
+                final productsUnderCategory = widget
+                        .inventoryProvider.warehouse?.products
+                        .where((p) => p.category == category)
+                        .toList() ??
+                    [];
+                _showProductsUnderCategoryDialog(
+                    context, category, productsUnderCategory);
+              },
+            )
+          : _OptimizedBarChart(
+              title: '',
+              data: _cachedInventoryValueByCategory!,
+              colors: _cachedCategoryColors!,
+              isValueChart: true,
+            ),
+    );
+  }
+
+  Widget _buildAnalyticsCard({required String title, required Widget child}) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Theme.of(context).colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title.isNotEmpty)
+              Text(
+                title,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary),
+              ),
+            if (title.isNotEmpty) const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Map<String, Color> _generateCategoryColors(List<String> categories) {
+    return {
+      'Fruits': Colors.red,
+      'Vegetables': Colors.green,
+      'Dairy': Colors.blue,
+      'Grains': Colors.brown,
+      'Meat': Colors.orange,
+      'Beverages': Colors.purple,
+    };
+  }
 
   Future<void> _showProductsUnderCategoryDialog(
       BuildContext context, String category, List<Product> products) {
@@ -1176,26 +874,270 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
   }
 }
 
-// Below are the AddProductForm and EditProductForm widgets (in the same file)
+// Optimized Chart Widgets
+class _OptimizedBarChart extends StatelessWidget {
+  final String title;
+  final Map<String, double> data;
+  final Map<String, Color> colors;
+  final bool isValueChart;
+
+  const _OptimizedBarChart({
+    required this.title,
+    required this.data,
+    required this.colors,
+    required this.isValueChart,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (data.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(title.isEmpty
+              ? 'No data available'
+              : '$title\nNo data available'),
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title.isNotEmpty)
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            if (title.isNotEmpty) const SizedBox(height: 16),
+            SizedBox(
+              height: 200,
+              child: BarChart(
+                BarChartData(
+                  barTouchData: BarTouchData(
+                    enabled: true,
+                    touchTooltipData: BarTouchTooltipData(
+                      tooltipRoundedRadius: 8,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final key = data.keys.elementAt(group.x.toInt());
+                        return BarTooltipItem(
+                          '$key\n',
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: isValueChart
+                                  ? '\$${rod.toY.toStringAsFixed(2)}'
+                                  : rod.toY.toStringAsFixed(0),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 1,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index >= 0 && index < data.keys.length) {
+                            final category = data.keys.elementAt(index);
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                _abbreviate(category),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox();
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            isValueChart
+                                ? '\$${value.toInt()}'
+                                : value.toInt().toString(),
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontSize: 10,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  groupsSpace: 12,
+                  maxY: _calculateMaxY(),
+                  barGroups: _buildBarGroups(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _abbreviate(String input) {
+    return input.length <= 8 ? input : '${input.substring(0, 6)}..';
+  }
+
+  double _calculateMaxY() {
+    if (data.isEmpty) return 0.0;
+    final maxVal = data.values.reduce((a, b) => a > b ? a : b);
+    return (maxVal * 1.2);
+  }
+
+  List<BarChartGroupData> _buildBarGroups() {
+    return data.entries.map((entry) {
+      final index = data.keys.toList().indexOf(entry.key);
+      final color = colors[entry.key] ?? Colors.teal;
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: entry.value,
+            gradient: LinearGradient(
+              colors: [
+                color.withValues(alpha: 0.9),
+                color.withValues(alpha: 0.6),
+              ],
+            ),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(4)),
+            width: 24,
+          ),
+        ],
+      );
+    }).toList();
+  }
+}
+
+class _OptimizedPieChart extends StatelessWidget {
+  final Map<String, double> data;
+  final Map<String, Color> colors;
+  final double screenWidth;
+  final Function(String) onSectionTap;
+
+  const _OptimizedPieChart({
+    required this.data,
+    required this.colors,
+    required this.screenWidth,
+    required this.onSectionTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (data.isEmpty) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text('No data available'),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 250,
+      child: PieChart(
+        PieChartData(
+          pieTouchData: PieTouchData(
+            touchCallback: (FlTouchEvent event, PieTouchResponse? response) {
+              if (!event.isInterestedForInteractions ||
+                  response == null ||
+                  response.touchedSection == null) return;
+              if (event is FlTapUpEvent) {
+                final touchedIndex =
+                    response.touchedSection!.touchedSectionIndex;
+                if (touchedIndex < data.keys.length) {
+                  final category = data.keys.elementAt(touchedIndex);
+                  onSectionTap(category);
+                }
+              }
+            },
+          ),
+          sections: data.entries.map((entry) {
+            final color = colors[entry.key] ?? Colors.teal;
+            return PieChartSectionData(
+              value: entry.value,
+              title: '${entry.key}\n\$${entry.value.toStringAsFixed(0)}',
+              color: color,
+              radius: 80,
+              titleStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
 
 // Helper: Build product avatar from asset path or file path
 Widget _buildProductAvatar(String? imagePath) {
   if (imagePath == null || imagePath.isEmpty) {
-    return const CircleAvatar(child: Icon(Icons.inventory_2));
+    return const CircleAvatar(
+        radius: 20, child: Icon(Icons.inventory_2, size: 20));
   }
   try {
     if (imagePath.startsWith('assets/')) {
-      return CircleAvatar(backgroundImage: AssetImage(imagePath));
+      return CircleAvatar(radius: 20, backgroundImage: AssetImage(imagePath));
     }
     if (imagePath.startsWith('/') || imagePath.startsWith('file:')) {
       return CircleAvatar(
+          radius: 20,
           backgroundImage:
               FileImage(File(imagePath.replaceFirst('file://', ''))));
     }
-    // Fallback: treat as asset if relative
-    return CircleAvatar(backgroundImage: AssetImage(imagePath));
+    return CircleAvatar(radius: 20, backgroundImage: AssetImage(imagePath));
   } catch (_) {
-    return const CircleAvatar(child: Icon(Icons.broken_image));
+    return const CircleAvatar(
+        radius: 20, child: Icon(Icons.broken_image, size: 20));
   }
 }
 
@@ -1214,7 +1156,7 @@ class _AddProductFormState extends State<AddProductForm> {
   String _unit = '';
   double _price = 0.0;
   DateTime _expiryDate = DateTime.now().add(const Duration(days: 30));
-  String? _image; // Variable to hold the selected image path
+  String? _image;
 
   @override
   Widget build(BuildContext context) {
@@ -1588,7 +1530,7 @@ class _EditProductFormState extends State<EditProductForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white, // Light background for dark text
+          backgroundColor: Colors.white,
           title: const Text('Add New Category',
               style: TextStyle(color: Colors.black)),
           content: TextField(
