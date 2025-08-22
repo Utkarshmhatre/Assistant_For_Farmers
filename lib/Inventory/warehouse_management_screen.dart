@@ -17,64 +17,46 @@ class WarehouseManagementScreen extends StatefulWidget {
 
 class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
   int _currentIndex = 0;
-  String _searchQuery = '';
   String _sortOption = 'Name';
   bool _showPieChartForDistribution = true; // Toggle for distribution view
-  bool _popupShown = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    // Reserved for future animation setup if needed
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<InventoryProvider>(context, listen: false).loadWarehouse();
+      final provider = Provider.of<InventoryProvider>(context, listen: false);
+      provider.loadWarehouse().then((_) => provider.seedDummyDataIfEmpty());
     });
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Consumer<InventoryProvider>(
       builder: (context, inventoryProvider, child) {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Warehouse Asistant'),
-            backgroundColor: Colors.teal,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () => inventoryProvider.loadWarehouse(),
-              ),
-            ],
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           ),
           body: inventoryProvider.isLoading
               ? const Center(child: CircularProgressIndicator())
               : _buildBody(inventoryProvider),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddProductDialog(context),
-            backgroundColor: Colors.teal,
+            backgroundColor: scheme.primary,
+            foregroundColor: scheme.onPrimary,
             child: const Icon(Icons.add),
           ),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
+            onTap: (i) => setState(() => _currentIndex = i),
+            backgroundColor: scheme.surface,
+            selectedItemColor: scheme.primary,
+            unselectedItemColor: scheme.onSurfaceVariant,
             items: const [
               BottomNavigationBarItem(
                   icon: Icon(Icons.dashboard), label: 'Overview'),
@@ -83,8 +65,6 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
               BottomNavigationBarItem(
                   icon: Icon(Icons.analytics), label: 'Analytics'),
             ],
-            selectedItemColor: Colors.teal,
-            unselectedItemColor: Colors.grey,
           ),
         );
       },
@@ -127,35 +107,39 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
         0;
     final percentage = (used / capacity * 100).clamp(0, 100);
 
+    final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.lightGreen[100],
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: scheme.primaryContainer,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Warehouse Capacity',
+            Text('Warehouse Capacity',
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal)),
+                    color: scheme.onPrimaryContainer)),
             const SizedBox(height: 16),
             LinearProgressIndicator(
               value: percentage / 100,
               minHeight: 20,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
+              backgroundColor: scheme.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
             ),
             const SizedBox(height: 8),
             Text('$used of $capacity used',
-                style: const TextStyle(color: Colors.teal)),
+                style: TextStyle(color: scheme.onPrimaryContainer)),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => _showEditCapacityDialog(context),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: scheme.primary,
+                foregroundColor: scheme.onPrimary,
+              ),
               child: const Text('Edit Capacity'),
             ),
           ],
@@ -172,21 +156,22 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             .toList() ??
         [];
 
+    final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.orange[100],
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: scheme.errorContainer,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Expiring Soon',
+            Text('Expiring Soon',
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange)),
+                    color: scheme.onErrorContainer)),
             const SizedBox(height: 16),
             if (expiringProducts.isEmpty)
               const Text('No products are expiring soon.')
@@ -219,27 +204,28 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
       'Utilize inventory management software for efficiency.',
     ];
 
+    final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.yellow[100],
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: scheme.secondaryContainer,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Quick Tips',
+            Text('Quick Tips',
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.brown)),
+                    color: scheme.onSecondaryContainer)),
             const SizedBox(height: 16),
             Column(
               children: tips
                   .map((tip) => ListTile(
-                        leading:
-                            const Icon(Icons.lightbulb, color: Colors.brown),
+                        leading: Icon(Icons.lightbulb,
+                            color: scheme.onSecondaryContainer),
                         title: Text(tip),
                       ))
                   .toList(),
@@ -265,7 +251,6 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             ),
             onChanged: (value) {
               setState(() {
-                _searchQuery = value;
                 inventoryProvider.setSearchQuery(value);
               });
             },
@@ -304,6 +289,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 margin:
                     const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                 child: ListTile(
+                  leading: _buildProductAvatar(product.image),
                   title: Text(product.name),
                   subtitle: Text(
                       '${product.quantity} ${product.unit} · \$${product.price.toStringAsFixed(2)}'),
@@ -312,12 +298,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.teal),
+                        icon: Icon(Icons.edit,
+                            color: Theme.of(context).colorScheme.primary),
                         onPressed: () =>
                             _showEditProductDialog(context, product, index),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
+                        icon: Icon(Icons.delete,
+                            color: Theme.of(context).colorScheme.error),
                         onPressed: () =>
                             _confirmDelete(context, inventoryProvider, index),
                       ),
@@ -339,6 +327,20 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     final categoryColors =
         _generateCategoryColors(inventoryValueByCategory.keys.toList());
     final screenWidth = MediaQuery.of(context).size.width;
+    final Map<String, int> quantityByCategory = {};
+    for (final p in products) {
+      quantityByCategory[p.category] =
+          (quantityByCategory[p.category] ?? 0) + p.quantity;
+    }
+    final lowStock = products.where((p) => p.quantity <= 10).toList()
+      ..sort((a, b) => a.quantity.compareTo(b.quantity));
+    final expiring7Days = products
+        .where((p) =>
+            p.expiryDate.isAfter(DateTime.now()) &&
+            p.expiryDate.difference(DateTime.now()).inDays <= 7)
+        .toList();
+    final topValuable = [...products]
+      ..sort((a, b) => (b.price * b.quantity).compareTo(a.price * a.quantity));
 
     // Additional metrics
     double totalValue = inventoryProvider.getTotalInventoryValue();
@@ -359,15 +361,16 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Analytics Dashboard',
                   style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal),
+                      color: Theme.of(context).colorScheme.primary),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.teal),
+                  icon: Icon(Icons.refresh,
+                      color: Theme.of(context).colorScheme.primary),
                   onPressed: () {
                     inventoryProvider.loadWarehouse();
                   },
@@ -382,14 +385,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.teal.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '\$${totalValue.toStringAsFixed(2)}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.teal,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
@@ -403,8 +406,8 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 children: [
                   Text(
                     '${inventoryProvider.getCapacityUtilizationPercentage().toStringAsFixed(1)}%',
-                    style: const TextStyle(
-                        color: Colors.teal,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 20,
                         fontWeight: FontWeight.bold),
                   ),
@@ -414,9 +417,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                         inventoryProvider.getCapacityUtilizationPercentage() /
                             100,
                     minHeight: 12,
-                    backgroundColor: Colors.grey[300],
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(Colors.teal),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary),
                   ),
                 ],
               ),
@@ -429,14 +433,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '\$${avgPrice.toStringAsFixed(2)}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.blue,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
@@ -450,8 +454,43 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 height: screenWidth * 0.8,
                 child: BarChart(
                   BarChartData(
-                    barTouchData: BarTouchData(enabled: true),
-                    gridData: FlGridData(show: true),
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        tooltipRoundedRadius: 8,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final key = inventoryValueByCategory.keys
+                              .elementAt(group.x.toInt());
+                          return BarTooltipItem(
+                            '$key\n',
+                            TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: '\$${rod.toY.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: 1,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        strokeWidth: 1,
+                      ),
+                    ),
                     titlesData: FlTitlesData(
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
@@ -465,9 +504,12 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                               return Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
-                                  category,
-                                  style: const TextStyle(
-                                      color: Colors.teal, fontSize: 12),
+                                  _abbr(category),
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               );
                             }
@@ -479,34 +521,52 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            return Text('\$${value.toInt()}K',
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 10));
+                            return Text(
+                              '\$${value.toInt()}K',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 10,
+                              ),
+                            );
                           },
                         ),
                       ),
                     ),
                     borderData: FlBorderData(show: false),
+                    groupsSpace: 18,
+                    maxY: (() {
+                      if (inventoryValueByCategory.isEmpty) return 0.0;
+                      final maxVal = inventoryValueByCategory.values
+                          .reduce((a, b) => a > b ? a : b);
+                      return (maxVal * 1.2).toDouble();
+                    })(),
                     barGroups: inventoryValueByCategory.entries.map((entry) {
                       final index = inventoryValueByCategory.keys
                           .toList()
                           .indexOf(entry.key);
-                      final color = categoryColors[entry.key] ?? Colors.teal;
+                      final color = categoryColors[entry.key] ??
+                          Theme.of(context).colorScheme.primary;
                       return BarChartGroupData(
                         x: index,
                         barRods: [
                           BarChartRodData(
                             toY: entry.value,
                             gradient: LinearGradient(
-                              colors: [color, color.withOpacity(0.7)],
-                              stops: const [0.1, 1.0],
+                              colors: [
+                                color.withValues(alpha: 0.9),
+                                color.withValues(alpha: 0.6),
+                              ],
                             ),
                             borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(6)),
                             width: screenWidth * 0.06,
                             backDrawRodData: BackgroundBarChartRodData(
                               show: true,
-                              color: Colors.grey[200]!,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
                             ),
                           ),
                         ],
@@ -517,20 +577,205 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
               ),
             ),
             const SizedBox(height: 24),
+            // Quantity by Category - Bar Chart
+            _buildAnalyticsCard(
+              title: 'Quantity by Category',
+              child: SizedBox(
+                height: screenWidth * 0.8,
+                child: BarChart(
+                  BarChartData(
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        tooltipRoundedRadius: 8,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final key = quantityByCategory.keys
+                              .elementAt(group.x.toInt());
+                          return BarTooltipItem(
+                            '$key\n',
+                            TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: rod.toY.toStringAsFixed(0),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: 1,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        strokeWidth: 1,
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            final index = value.toInt();
+                            final keys = quantityByCategory.keys.toList();
+                            if (index >= 0 && index < keys.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  _abbr(keys[index]),
+                                  style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontSize: 12),
+                                ),
+                              );
+                            }
+                            return const SizedBox();
+                          },
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) => Text(
+                            value.toInt().toString(),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    groupsSpace: 18,
+                    maxY: (() {
+                      if (quantityByCategory.isEmpty) return 0.0;
+                      final maxVal = quantityByCategory.values
+                          .reduce((a, b) => a > b ? a : b)
+                          .toDouble();
+                      return (maxVal * 1.2).toDouble();
+                    })(),
+                    barGroups: quantityByCategory.entries.map((entry) {
+                      final idx =
+                          quantityByCategory.keys.toList().indexOf(entry.key);
+                      final color = categoryColors[entry.key] ??
+                          Theme.of(context).colorScheme.primary;
+                      return BarChartGroupData(
+                        x: idx,
+                        barRods: [
+                          BarChartRodData(
+                            toY: entry.value.toDouble(),
+                            gradient: LinearGradient(colors: [
+                              color.withValues(alpha: 0.9),
+                              color.withValues(alpha: 0.6),
+                            ]),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(6)),
+                            width: screenWidth * 0.06,
+                            backDrawRodData: BackgroundBarChartRodData(
+                              show: true,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Low Stock Items
+            _buildAnalyticsCard(
+              title: 'Low Stock Items (≤ 10)',
+              child: lowStock.isEmpty
+                  ? const Text('No low stock items')
+                  : Column(
+                      children: lowStock.take(5).map((p) {
+                        return ListTile(
+                          leading: _buildProductAvatar(p.image),
+                          title: Text(p.name),
+                          subtitle: Text(
+                              'Qty: ${p.quantity} ${p.unit} · ${p.category}'),
+                        );
+                      }).toList(),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            // Expiring within 7 days
+            _buildAnalyticsCard(
+              title: 'Expiring within 7 days',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${expiring7Days.length} product(s)'),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: expiring7Days.take(12).map((p) {
+                      final days =
+                          p.expiryDate.difference(DateTime.now()).inDays;
+                      return Chip(
+                        label: Text('${p.name} • ${days}d'),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.errorContainer,
+                        labelStyle: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Top Valuable Products
+            _buildAnalyticsCard(
+              title: 'Top Valuable Products',
+              child: Column(
+                children: topValuable.take(5).map((p) {
+                  final value = (p.price * p.quantity);
+                  return ListTile(
+                    leading: _buildProductAvatar(p.image),
+                    title: Text(p.name),
+                    subtitle: Text(p.category),
+                    trailing: Text('\$${value.toStringAsFixed(2)}'),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 24),
             // Category Distribution (Pie vs. Bar toggle)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Category Distribution',
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal),
+                      color: Theme.of(context).colorScheme.primary),
                 ),
                 Row(
                   children: [
-                    const Text('Bar', style: TextStyle(color: Colors.teal)),
+                    Text('Bar',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                     Switch(
                       value: _showPieChartForDistribution,
                       onChanged: (value) {
@@ -538,9 +783,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                           _showPieChartForDistribution = value;
                         });
                       },
-                      activeColor: Colors.teal,
+                      activeColor: Theme.of(context).colorScheme.primary,
                     ),
-                    const Text('Pie', style: TextStyle(color: Colors.teal)),
+                    Text('Pie',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                   ],
                 )
               ],
@@ -620,8 +867,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         category,
-                                        style: const TextStyle(
-                                            color: Colors.teal, fontSize: 12),
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontSize: 12),
                                       ),
                                     );
                                   }
@@ -635,8 +885,11 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                                 getTitlesWidget: (value, meta) {
                                   return Text(
                                     '\$${value.toInt()}K',
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 10),
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                        fontSize: 10),
                                   );
                                 },
                               ),
@@ -648,23 +901,27 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                             final idx = inventoryValueByCategory.keys
                                 .toList()
                                 .indexOf(entry.key);
-                            final color =
-                                categoryColors[entry.key] ?? Colors.teal;
+                            final color = categoryColors[entry.key] ??
+                                Theme.of(context).colorScheme.primary;
                             return BarChartGroupData(
                               x: idx,
                               barRods: [
                                 BarChartRodData(
                                   toY: entry.value,
                                   gradient: LinearGradient(
-                                    colors: [color, color.withOpacity(0.7)],
-                                    stops: const [0.1, 1.0],
+                                    colors: [
+                                      color.withValues(alpha: 0.9),
+                                      color.withValues(alpha: 0.6),
+                                    ],
                                   ),
                                   borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(6)),
                                   width: screenWidth * 0.06,
                                   backDrawRodData: BackgroundBarChartRodData(
                                     show: true,
-                                    color: Colors.grey[200]!,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest,
                                   ),
                                 ),
                               ],
@@ -682,14 +939,14 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '$totalProducts Products',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.purple,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
@@ -701,12 +958,18 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     );
   }
 
+  String _abbr(String input) {
+    if (input.length <= 10) return input;
+    // Keep first 9 chars + ellipsis for compact x-axis labels
+    return '${input.substring(0, 9)}…';
+  }
+
   Widget _buildAnalyticsCard({required String title, required Widget child}) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white,
-      shadowColor: Colors.black.withOpacity(0.2),
+      color: Theme.of(context).colorScheme.surface,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -715,10 +978,10 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
             if (title.isNotEmpty)
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal),
+                    color: Theme.of(context).colorScheme.primary),
               ),
             if (title.isNotEmpty) const SizedBox(height: 16),
             child,
@@ -728,31 +991,7 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
     );
   }
 
-  List<FlSpot> _generateTrendData(List<Product> products) {
-    // Mock data for trends, replace with actual data as needed
-    return [
-      const FlSpot(0, 50),
-      const FlSpot(1, 80),
-      const FlSpot(2, 70),
-      const FlSpot(3, 90),
-      const FlSpot(4, 100),
-    ];
-  }
-
-  List<RadarEntry> _generateCategoryComparisonData(
-      Map<String, double> inventoryValueByCategory) {
-    // Ensure at least three entries for the radar chart
-    List<RadarEntry> entries = inventoryValueByCategory.entries.map((entry) {
-      return RadarEntry(value: entry.value);
-    }).toList();
-
-    // Add dummy entries if less than three
-    while (entries.length < 3) {
-      entries.add(const RadarEntry(value: 0)); // Add a zero entry
-    }
-
-    return entries;
-  }
+  // Removed unused helpers
 
   Map<String, Color> _generateCategoryColors(List<String> categories) {
     // Generate a color map for categories
@@ -938,6 +1177,27 @@ class _WarehouseManagementScreenState extends State<WarehouseManagementScreen>
 }
 
 // Below are the AddProductForm and EditProductForm widgets (in the same file)
+
+// Helper: Build product avatar from asset path or file path
+Widget _buildProductAvatar(String? imagePath) {
+  if (imagePath == null || imagePath.isEmpty) {
+    return const CircleAvatar(child: Icon(Icons.inventory_2));
+  }
+  try {
+    if (imagePath.startsWith('assets/')) {
+      return CircleAvatar(backgroundImage: AssetImage(imagePath));
+    }
+    if (imagePath.startsWith('/') || imagePath.startsWith('file:')) {
+      return CircleAvatar(
+          backgroundImage:
+              FileImage(File(imagePath.replaceFirst('file://', ''))));
+    }
+    // Fallback: treat as asset if relative
+    return CircleAvatar(backgroundImage: AssetImage(imagePath));
+  } catch (_) {
+    return const CircleAvatar(child: Icon(Icons.broken_image));
+  }
+}
 
 class AddProductForm extends StatefulWidget {
   const AddProductForm({super.key});

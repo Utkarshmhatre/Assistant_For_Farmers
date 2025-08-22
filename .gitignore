@@ -46,3 +46,4 @@ linux/flutter/ephemeral/
 # Miscellaneous
 *.log
 pubspec.lock
+lib/src/config/secrets.dart

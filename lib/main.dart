@@ -1,13 +1,14 @@
 import 'dart:ui';
-import 'package:farm_assistx/Inventory/warehouse.dart';
+// import 'package:farm_assistx/Inventory/warehouse.dart';
 import 'package:farm_assistx/Inventory/warehouse_management_screen.dart';
 import 'package:farm_assistx/ai_chatbot_screen.dart';
 import 'package:farm_assistx/distribution_screen.dart';
-import 'package:farm_assistx/events.dart';
+import 'events.dart';
 import 'package:farm_assistx/playlist_page.dart';
 import 'package:farm_assistx/trivia.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// GoogleFonts used within AppTheme
+import 'src/theme/app_theme.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'DurgaPujaApp.dart';
@@ -35,35 +36,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'FarmAssistX',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: Colors.deepPurple,
-          scaffoldBackgroundColor: Colors.black,
-          appBarTheme: const AppBarTheme(
-            color: Colors.transparent,
-            elevation: 0,
-            centerTitle: true,
-            iconTheme: IconThemeData(color: Colors.white),
-          ),
-          textTheme: GoogleFonts.latoTextTheme(
-            Theme.of(context).textTheme.copyWith(
-                  displayLarge: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  displayMedium: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  bodyLarge: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                  ),
-                ),
-          ),
-        ),
+        themeMode: ThemeMode.system,
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
         home: const BallBounceIndex(),
       ),
     );
@@ -92,9 +67,8 @@ class _SplashScreenState extends State<SplashScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-          builder: (context) => const InitialPage(
-                title: 'abc',
-              )),
+        builder: (context) => const InitialPage(title: 'abc'),
+      ),
     );
   }
 
@@ -142,7 +116,7 @@ class HomePage extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: Container(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -341,7 +315,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
               gradient: LinearGradient(
                 colors: [
                   _colorAnimation.value!,
-                  _colorAnimation.value!.withOpacity(0.5),
+                  _colorAnimation.value!.withValues(alpha: 0.5),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -459,7 +433,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const EventsPage()),
+                                builder: (context) => EventsPage()),
                           );
                         },
                       ),

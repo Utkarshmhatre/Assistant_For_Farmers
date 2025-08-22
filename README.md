@@ -11,6 +11,7 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Smart Inventory Management**: Optimize stock levels using advanced algorithms
 - **Route Optimization**: Efficient delivery planning based on multiple parameters
 - **Weather Integration**: Smart mapping and algorithms to adapt delivery strategies based on weather conditions
+- **Task & Schedule Planner**: Plan farm operations (sowing, irrigation, fertilizer, pesticide, harvest, market, veterinary, equipment maintenance) with notes/time, mark tasks done, and view by date
 - **Real-time Order Management**: Instant notifications and order tracking
 - **GPS-enabled Delivery System**: Streamlined delivery process with real-time tracking
 
@@ -21,7 +22,7 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Rating & Review System**: Provide feedback and maintain quality standards
 - **Push Notifications**: Stay updated with order status and delivery information
 
-## � App Screens & Features (Implemented)
+## App Screens & Features (Implemented)
 
 - Home Dashboard: Animated, dark-themed landing with quick actions and upcoming features.
 - Farmer Toolkit: Practical calculators and tips for farmers.
@@ -37,10 +38,15 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - Payments: PhonePe SDK integration (sandbox) with animated UI and receipt dialog.
 - Gallery/Products: Browse produce with images and details.
 - Playlists: Curated educational or promotional videos.
-- Events: Explore events and community activities.
+- Events/Tasks Planner: Farmer-focused planner to track fieldwork.
+	- Event types with icons/colors: sowing, irrigation, fertilizer, pesticide, harvest, market, veterinary, equipment, other
+	- Quick add via bottom sheet: title, optional notes, optional time
+	- Mark done/undo and delete tasks
+	- Offline persistence using Shared Preferences
+	- Calendar view powered by TableCalendar
 - About Us: Project overview and benefits.
 
-## �💪 Benefits
+## 💪 Benefits
 
 ### Farmers
 - Maximize profits by eliminating middlemen
@@ -70,6 +76,23 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Payments**: PhonePe Payment SDK integration (sandbox)
 - **Navigation**: Ultra-precise routing system
 - **Additional Packages**: 12 specialized packages for enhanced functionality
+- **Calendar & Scheduling**: Date-based task planning using `table_calendar`
+
+## 🔄 What’s New (Aug 2025)
+- Events/Tasks Planner
+	- Added event types, notes and optional time fields
+	- Mark done/undo and delete actions
+	- Offline persistence with Shared Preferences
+	- Calendar view (TableCalendar) with colored markers
+	- Fixed overflow in the list area and improved search field contrast for dark mode
+- App-wide Theming
+	- Material 3 light/dark themes with high-contrast color scheme
+	- Consistent chips, cards, inputs, and button styling via ThemeData
+- Inventory/Warehouse
+	- Images now display using safe asset/file avatar handling with graceful fallbacks
+	- Seeded dummy products on first run to showcase features
+	- Expanded Analytics: value and quantity by category charts, low stock and expiring soon lists, and top valuable products
+	- Optimized charts with tooltips, grid lines, spacing, and better scaling
 
 ## 📱 Screenshots
 [Coming Soon]
