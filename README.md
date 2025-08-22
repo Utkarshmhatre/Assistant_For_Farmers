@@ -84,10 +84,9 @@ We welcome contributions to FarmAssistX! Please read our contributing guidelines
 This project is licensed under the [MIT License](LICENSE)
 
 ## 📞 Contact
-- Project Lead - [Your Name](mailto:your.email@domain.com)
-- Project Link: [https://github.com/yourusername/FarmAssistX](https://github.com/yourusername/FarmAssistX)
+- Project Lead - [Utkarsh Naresh Mhatre](mailto:utkarshmhatre434@gmail.com)
+- Project Link: [https://github.com/Utkarshmhatre/Farm_AssistX](https://github.com/Utkarshmhatre/Farm_AssistX)
 
 ## 🙏 Acknowledgments
-- All the farmers and customers who provided valuable feedback
+
 - The Flutter community for excellent tools and support
-- [List any other acknowledgments]
