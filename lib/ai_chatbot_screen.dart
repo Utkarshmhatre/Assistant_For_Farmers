@@ -20,7 +20,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
   void initState() {
     super.initState();
     _model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-1.5-flash-latest',
       apiKey: Secrets.geminiApiKey,
     );
   }
@@ -29,7 +29,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Food Assistant'),
+        title: const Text('AI Assistant'),
       ),
       body: Stack(
         children: [
@@ -144,8 +144,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
       // Allow any query without restrictions
 
       // If the query is food-related, continue with the AI response generation
-      final prompt =
-          'You are an expert. Answer the following question: $query';
+      final prompt = 'You are an expert. Answer the following question: $query';
       final content = [Content.text(prompt)];
       final response = await _model.generateContent(content);
 
@@ -199,7 +198,8 @@ class ChatMessage extends StatelessWidget {
               children: [
                 Text(
                   isUser ? 'You' : 'AI Assistant',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 Container(
                   margin: const EdgeInsets.only(top: 5.0),

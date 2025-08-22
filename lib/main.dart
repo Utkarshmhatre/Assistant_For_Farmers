@@ -508,7 +508,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'RCOP Group',
+                    'Created by HackMates with love ❤️',
                     style: TextStyle(color: Colors.white54, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
@@ -700,6 +700,10 @@ class AboutUsPage extends StatelessWidget {
               '6. Machine Learning with Random Forest and more\n'
               '7. AI Support and Ultra Navigation',
               style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Text(
+              'Created by HackMates with love ❤️',
+              style: Theme.of(context).textTheme.displayMedium,
             ),
 
             const SizedBox(height: 20),

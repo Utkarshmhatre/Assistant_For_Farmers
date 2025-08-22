@@ -20,7 +20,7 @@ class GalleryPage extends StatelessWidget {
         backgroundColor: Colors.black,
         elevation: 0,
         title: const Text(
-          'Gallery',
+          'Products',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
