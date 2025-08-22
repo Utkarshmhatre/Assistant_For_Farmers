@@ -84,8 +84,8 @@ We welcome contributions to FarmAssistX! Please read our contributing guidelines
 This project is licensed under the [MIT License](LICENSE)
 
 ## 📞 Contact
-- Project Lead - [Your Name](mailto:your.email@domain.com)
-- Project Link: [https://github.com/yourusername/FarmAssistX](https://github.com/yourusername/FarmAssistX)
+- Project Lead - [Utkarsh Naresh Mhatre](mailto:utkarshmhatre434@gmail.com)
+- Project Link: [https://github.com/Utkarshmhatre/FarmAssistX](https://github.com/Utkarshmhatre/FarmAssistX)
 
 ## 🙏 Acknowledgments
 
