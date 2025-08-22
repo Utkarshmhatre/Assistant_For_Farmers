@@ -22,34 +22,71 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Rating & Review System**: Provide feedback and maintain quality standards
 - **Push Notifications**: Stay updated with order status and delivery information
 
-## App Screens & Features (Implemented)
+## App Screens & Features
 
-- Home Dashboard: Animated, dark-themed landing with quick actions and upcoming features.
-- Farmer Toolkit: Practical calculators and tips for farmers.
-	- Seed Requirement: kg needed by area, seed rate, and germination %.
+### Splash & Onboarding
+- Branded splash with smooth transition into the app.
+- First-run seeding for demo content where applicable.
+
+### Home Dashboard
+- Animated, dark-optimized landing with quick-action cards.
+- Highlights key modules (Inventory, Tasks, Weather, Payments).
+- Helpful tips and entry points to farmer tools.
+
+### Farmer Toolkit
+- Compact utilities to speed up field decisions:
+	- Seed Requirement: kg by area, seed rate, germination %.
 	- Fertilizer Planner: N–P2O5–K2O split using DAP, Urea, MOP.
 	- Irrigation Water Need: Volume by area and application depth.
 	- Profit Estimator: Revenue, cost, and estimated profit.
-	- Quick Tips: Best practices for soil, irrigation, and cropping.
-- AI Assistant: In-app chat powered by Google Gemini for guidance and Q&A.
-- Weather: Current conditions to inform planning and logistics.
-- Inventory/Warehouse: Manage stock and track items.
-	- Unified theming with the app (Material 3 ColorScheme) for readable light/dark UI
-	- Add, edit, delete products with image thumbnails and category management
-	- Persistent product images (stored in app documents directory)
-	- Search and sort (by name, quantity, expiry)
-	- Capacity indicator, expiry alerts, and quick tips
-- Distribution/Map: Map screen to visualize sites and help plan routes.
-- Payments: PhonePe SDK integration (sandbox) with animated UI and receipt dialog.
-- Gallery/Products: Browse produce with images and details.
-- Playlists: Curated educational or promotional videos.
-- Events/Tasks Planner: Farmer-focused planner to track fieldwork.
-	- Event types with icons/colors: sowing, irrigation, fertilizer, pesticide, harvest, market, veterinary, equipment, other
-	- Quick add via bottom sheet: title, optional notes, optional time
-	- Mark done/undo and delete tasks
-	- Offline persistence using Shared Preferences
-	- Calendar view powered by TableCalendar
-- About Us: Project overview and benefits.
+	- Quick Tips: Practical guidance for soil, irrigation, and cropping.
+
+### Inventory / Warehouse
+- Unified with the app theme (Material 3 ColorScheme) for readable light/dark UI.
+- Product management: add, edit, delete with category selection.
+- Image handling: pick from gallery; images are copied to app documents directory for persistence and displayed reliably.
+- Search and sort: by name, quantity, and expiry date.
+- Overview: capacity indicator, expiring-soon alerts, and quick tips.
+- Analytics dashboard (farmer-centric):
+	- Inventory value by category (bar chart) and category distribution (pie/bar toggle)
+	- Low stock alerts (<= 10) and Expiring soon (14 days)
+	- Top value items and Average shelf-life by category (progress bars)
+	- Themed charts and labels optimized for readability and performance
+
+### Events & Tasks Planner
+- Plan sowing, irrigation, fertilizer, pesticide, harvest, market, veterinary, equipment, and other tasks.
+- Quick-add via bottom sheet with title, notes, optional time.
+- Mark done/undo, edit, and delete actions.
+- Offline persistence using Shared Preferences.
+- Calendar view powered by TableCalendar with colored markers.
+
+### Distribution / Map
+- Visualize locations and navigate to planning views.
+- Location-aware features using Geolocator; optimized dark map styling.
+- Designed to assist with route planning and site visits.
+
+### Weather
+- Current conditions to inform planning and logistics.
+- Uses clear, contrast-friendly visualizations aligned with the app theme.
+
+### AI Assistant
+- In-app chat powered by Google Gemini for guidance and Q&A.
+- Helpful summaries and suggestions tailored for farming workflows.
+
+### Payments
+- PhonePe SDK (sandbox) with animated UI and receipt dialog.
+- Clear success/failure feedback and optional share/print flow.
+
+### Gallery / Products
+- Browse produce and marketing visuals with clean, responsive layouts.
+- Fast image loading and graceful fallbacks.
+
+### Playlists
+- Curated educational and promotional videos.
+- Lightweight player controls and smooth switching.
+
+### About Us
+- Project overview, goals, and benefits for both farmers and customers.
 
 ## 💪 Benefits
 
@@ -84,30 +121,6 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Navigation**: Ultra-precise routing system
 - **Additional Packages**: 12 specialized packages for enhanced functionality
 - **Calendar & Scheduling**: Date-based task planning using `table_calendar`
-
-## 🔄 What’s New (Aug 2025)
-- Events/Tasks Planner
-	- Added event types, notes and optional time fields
-	- Mark done/undo and delete actions
-	- Offline persistence with Shared Preferences
-	- Calendar view (TableCalendar) with colored markers
-	- Fixed overflow in the list area and improved search field contrast for dark mode
-- App-wide Theming
-	- Material 3 light/dark themes with high-contrast color scheme
-	- Consistent chips, cards, inputs, and button styling via ThemeData
-- Inventory/Warehouse
-	- Unified with global theme (reduced brightness, better contrast in light mode; high-contrast dark mode)
-	- Images now persist: gallery selections are copied into app's documents directory and render reliably
-	- Seeded dummy fruits/vegetables/dairy/grains on first run to showcase features
-	- Expanded Analytics:
-		- Inventory value by category (bar chart) and category distribution (pie/bar toggle)
-		- Low stock alerts (<= 10), Expiring soon (14 days)
-		- Top value items and Average shelf-life by category (progress bars)
-	- Optimized charts and colors for readability and performance
-	- Images now display using safe asset/file avatar handling with graceful fallbacks
-	- Seeded dummy products on first run to showcase features
-	- Expanded Analytics: value and quantity by category charts, low stock and expiring soon Lists, and top valuable products
-	- Optimized charts with tooltips, grid lines, spacing, and better scaling
 
 ## 📱 Screenshots
 [Coming Soon]
