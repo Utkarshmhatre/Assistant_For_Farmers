@@ -88,6 +88,5 @@ This project is licensed under the [MIT License](LICENSE)
 - Project Link: [https://github.com/yourusername/FarmAssistX](https://github.com/yourusername/FarmAssistX)
 
 ## 🙏 Acknowledgments
-- All the farmers and customers who provided valuable feedback
+
 - The Flutter community for excellent tools and support
-- [List any other acknowledgments]
