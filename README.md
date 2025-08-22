@@ -21,7 +21,26 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 - **Rating & Review System**: Provide feedback and maintain quality standards
 - **Push Notifications**: Stay updated with order status and delivery information
 
-## 💪 Benefits
+## � App Screens & Features (Implemented)
+
+- Home Dashboard: Animated, dark-themed landing with quick actions and upcoming features.
+- Farmer Toolkit: Practical calculators and tips for farmers.
+	- Seed Requirement: kg needed by area, seed rate, and germination %.
+	- Fertilizer Planner: N–P2O5–K2O split using DAP, Urea, MOP.
+	- Irrigation Water Need: Volume by area and application depth.
+	- Profit Estimator: Revenue, cost, and estimated profit.
+	- Quick Tips: Best practices for soil, irrigation, and cropping.
+- AI Assistant: In-app chat powered by Google Gemini for guidance and Q&A.
+- Weather: Current conditions to inform planning and logistics.
+- Inventory/Warehouse: Manage stock and track items.
+- Distribution/Map: Map screen to visualize sites and help plan routes.
+- Payments: PhonePe SDK integration (sandbox) with animated UI and receipt dialog.
+- Gallery/Products: Browse produce with images and details.
+- Playlists: Curated educational or promotional videos.
+- Events: Explore events and community activities.
+- About Us: Project overview and benefits.
+
+## �💪 Benefits
 
 ### Farmers
 - Maximize profits by eliminating middlemen
@@ -47,7 +66,8 @@ FarmAssistX is a revolutionary Flutter-based mobile marketplace that bridges the
 
 ### Advanced Features
 - **Machine Learning**: Random Forest algorithms for optimization
-- **AI Support**: Intelligent decision-making systems
+- **AI Support**: Google Generative AI (Gemini via `google_generative_ai`)
+- **Payments**: PhonePe Payment SDK integration (sandbox)
 - **Navigation**: Ultra-precise routing system
 - **Additional Packages**: 12 specialized packages for enhanced functionality
 

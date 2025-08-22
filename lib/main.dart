@@ -417,6 +417,18 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
+                        icon: Icons.agriculture,
+                        title: 'Farmer Toolkit',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const TriviaPage()),
+                          );
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context,
                         icon: Icons.monetization_on,
                         title: 'Payments',
                         onTap: () {
