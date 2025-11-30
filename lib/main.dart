@@ -1,7 +1,7 @@
 import 'dart:ui';
 // import 'package:farm_assistx/Inventory/warehouse.dart';
 import 'package:farm_assistx/Inventory/warehouse_management_screen.dart';
-import 'package:farm_assistx/ai_chatbot_screen.dart';
+import 'package:farm_assistx/ClimateAIApp.dart';
 import 'package:farm_assistx/distribution_screen.dart';
 import 'events.dart';
 import 'package:farm_assistx/playlist_page.dart';
@@ -116,7 +116,7 @@ class HomePage extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: Container(
-                color: Colors.black.withValues(alpha: 0.6),
+                color: Colors.black.withOpacity(0.6),
               ),
             ),
           ),
@@ -315,7 +315,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
               gradient: LinearGradient(
                 colors: [
                   _colorAnimation.value!,
-                  _colorAnimation.value!.withValues(alpha: 0.5),
+                  _colorAnimation.value!.withOpacity(0.5),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -445,7 +445,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const AIChatbotScreen()),
+                                builder: (context) => const ClimateAIApp()),
                           );
                         },
                       ),

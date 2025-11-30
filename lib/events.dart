@@ -436,8 +436,8 @@ class _EventsPageState extends State<EventsPage> {
                             )
                           : null,
                       filled: true,
-                      fillColor: theme.colorScheme.surfaceVariant
-                          .withValues(alpha: 0.3),
+                      fillColor:
+                          theme.colorScheme.surfaceVariant.withOpacity(0.3),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -471,8 +471,7 @@ class _EventsPageState extends State<EventsPage> {
                                 avatar: Icon(type.icon, size: 16),
                                 label: Text(type.label),
                                 selected: _selectedTypes.contains(type),
-                                selectedColor:
-                                    type.color.withValues(alpha: 0.2),
+                                selectedColor: type.color.withOpacity(0.2),
                                 onSelected: (selected) {
                                   setState(() {
                                     if (selected) {
@@ -614,7 +613,7 @@ class _EventsPageState extends State<EventsPage> {
                               child: ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor:
-                                      event.type.color.withValues(alpha: 0.15),
+                                      event.type.color.withOpacity(0.15),
                                   child: Icon(
                                     event.type.icon,
                                     color: event.type.color,
