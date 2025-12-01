@@ -72,7 +72,7 @@ class AppTheme {
           borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
       ),
-      cardTheme: const CardThemeData(
+      cardTheme: const CardTheme(
         elevation: 1,
         margin: EdgeInsets.all(8),
       ),
@@ -156,7 +156,7 @@ class AppTheme {
           borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
       ),
-      cardTheme: const CardThemeData(
+      cardTheme: const CardTheme(
         elevation: 2,
         margin: EdgeInsets.all(8),
       ),
