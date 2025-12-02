@@ -95,7 +95,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: FadeInDown(
           child: Text(
-            'FarmAssistX Dashboard',
+            'Dashboard',
             style: Theme.of(context).textTheme.displayMedium,
             selectionColor: Colors.lightBlue,
           ),
@@ -240,7 +240,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),
                         Text(
-                          'FarmAssistX Information',
+                          'What is FarmAssistX?',
                           style: Theme.of(context).textTheme.displayMedium,
                         ),
                         const SizedBox(height: 10),
@@ -494,7 +494,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'Created by HackMates with love ❤️',
+                    'Created by Team 404 Not Found with love ❤️',
                     style: TextStyle(color: Colors.white54, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
