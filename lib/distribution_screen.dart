@@ -79,7 +79,8 @@ class _DistributionScreenState extends State<DistributionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Distribution Network'),
+        title: const Text('Climate-Smart Distribution'),
+        backgroundColor: Colors.green.shade700,
         actions: [
           IconButton(
             icon: Icon(_isSearchVisible ? Icons.close : Icons.search),

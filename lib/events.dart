@@ -12,6 +12,8 @@ enum FarmEventType {
   market,
   veterinary,
   maintenance,
+  climate,
+  sustainability,
   other
 }
 
@@ -34,6 +36,10 @@ extension FarmEventTypeExtension on FarmEventType {
         return 'Veterinary';
       case FarmEventType.maintenance:
         return 'Maintenance';
+      case FarmEventType.climate:
+        return 'Climate Action';
+      case FarmEventType.sustainability:
+        return 'Sustainability';
       case FarmEventType.other:
         return 'Other';
     }
@@ -57,6 +63,10 @@ extension FarmEventTypeExtension on FarmEventType {
         return Icons.medical_services;
       case FarmEventType.maintenance:
         return Icons.build;
+      case FarmEventType.climate:
+        return Icons.thermostat;
+      case FarmEventType.sustainability:
+        return Icons.nature;
       case FarmEventType.other:
         return Icons.task_alt;
     }
@@ -80,6 +90,10 @@ extension FarmEventTypeExtension on FarmEventType {
         return Colors.red;
       case FarmEventType.maintenance:
         return Colors.grey;
+      case FarmEventType.climate:
+        return Colors.cyan;
+      case FarmEventType.sustainability:
+        return Colors.lightGreen;
       case FarmEventType.other:
         return Colors.teal;
     }
@@ -297,7 +311,7 @@ class _EventsPageState extends State<EventsPage> {
             ),
           ),
         ),
-        title: const Text('Farm Tasks & Events',
+        title: const Text('Climate-Smart Task Planner',
             style: TextStyle(fontWeight: FontWeight.bold)),
         foregroundColor: Colors.white,
         elevation: 0,

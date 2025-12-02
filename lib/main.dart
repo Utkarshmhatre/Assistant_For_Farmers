@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => InventoryProvider(),
       child: MaterialApp(
-        title: 'FarmAssistX',
+        title: 'ClimateAI FarmAssist',
         debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.system,
         theme: AppTheme.light(),
@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const InitialPage(title: 'abc'),
+        builder: (context) => const InitialPage(title: 'ClimateAI FarmAssist'),
       ),
     );
   }
@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         child: Text(
-          'FarmAssistX',
+          'ClimateAI FarmAssist',
           style: Theme.of(context).textTheme.displayLarge,
         ),
       ),
@@ -95,7 +95,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: FadeInDown(
           child: Text(
-            'Dashboard',
+            'Climate Dashboard',
             style: Theme.of(context).textTheme.displayMedium,
             selectionColor: Colors.lightBlue,
           ),
@@ -130,7 +130,7 @@ class HomePage extends StatelessWidget {
                 children: [
                   ElasticIn(
                     child: Text(
-                      'Welcome to FarmAssistX!',
+                      'Welcome to ClimateAI FarmAssist!',
                       style: Theme.of(context).textTheme.displayLarge,
                       textAlign: TextAlign.center,
                     ),
@@ -138,7 +138,7 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 20),
                   FadeInUp(
                     child: Text(
-                      'FarmAssistX connects farmers with customers, ensuring fair prices and high-quality produce directly from the source.',
+                      'Empowering farmers to adapt to climate change with AI-powered insights, sustainable practices, and a climate-focused marketplace.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
@@ -148,7 +148,7 @@ class HomePage extends StatelessWidget {
                     delay: const Duration(milliseconds: 200),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.green.shade700,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -156,9 +156,9 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       icon:
-                          const Icon(Icons.shopping_cart, color: Colors.white),
+                          const Icon(Icons.eco, color: Colors.white),
                       label: const Text(
-                        'Place an Order',
+                        'Climate Initiatives',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       onPressed: () {
@@ -175,16 +175,16 @@ class HomePage extends StatelessWidget {
                     delay: const Duration(milliseconds: 400),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purpleAccent,
+                        backgroundColor: Colors.teal.shade600,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      icon: const Icon(Icons.photo_album, color: Colors.white),
+                      icon: const Icon(Icons.nature, color: Colors.white),
                       label: const Text(
-                        'View Products',
+                        'Sustainable Products',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       onPressed: () {
@@ -203,7 +203,7 @@ class HomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Upcoming Features',
+                          'Climate Action Features',
                           style: Theme.of(context).textTheme.displayMedium,
                         ),
                         const SizedBox(height: 10),
@@ -217,22 +217,22 @@ class HomePage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '1. Community Services',
+                                '🌍 Climate Resilience Tools',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                'Join us for community service days to support local farmers and improve agricultural practices.',
+                                'Access AI-powered insights to adapt your farming practices to changing climate conditions.',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                '2. Agricultural Workshops',
+                                '🌱 Sustainable Farming Practices',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                'Participate in workshops to learn about sustainable farming and innovative agricultural techniques.',
+                                'Learn water conservation, organic farming, and eco-friendly techniques to reduce your carbon footprint.',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ],
@@ -240,7 +240,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),
                         Text(
-                          'What is FarmAssistX?',
+                          'About ClimateAI FarmAssist',
                           style: Theme.of(context).textTheme.displayMedium,
                         ),
                         const SizedBox(height: 10),
@@ -274,8 +274,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
   final List<Color> _colors = [
-    Colors.deepPurple,
-    Colors.purpleAccent,
+    Colors.green.shade700,
+    Colors.teal.shade600,
   ];
 
   @override
@@ -339,10 +339,10 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       SizedBox(width: 15),
                       Expanded(
                         child: Text(
-                          'FarmAssistX',
+                          'ClimateAI FarmAssist',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 2,
@@ -368,7 +368,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       _buildDrawerItem(
                         context,
                         icon: Icons.video_collection,
-                        title: 'Playlists',
+                        title: 'Climate Resources',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -379,8 +379,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.video_collection,
-                        title: 'Products',
+                        icon: Icons.nature,
+                        title: 'Sustainable Products',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -391,8 +391,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.agriculture,
-                        title: 'Farmer Toolkit',
+                        icon: Icons.eco,
+                        title: 'Climate-Smart Toolkit',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -403,8 +403,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.monetization_on,
-                        title: 'Payments',
+                        icon: Icons.volunteer_activism,
+                        title: 'Climate Initiatives',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -427,8 +427,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.event,
-                        title: 'Events Page',
+                        icon: Icons.calendar_month,
+                        title: 'Climate Events',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -439,8 +439,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.event,
-                        title: 'Ai Chatbot',
+                        icon: Icons.smart_toy,
+                        title: 'Climate AI Assistant',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -451,8 +451,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.event,
-                        title: 'Map',
+                        icon: Icons.map,
+                        title: 'Distribution Map',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -464,8 +464,8 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.event,
-                        title: 'Weather',
+                        icon: Icons.cloud,
+                        title: 'Climate & Weather',
                         onTap: () {
                           Navigator.push(
                             context,
@@ -476,7 +476,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                       ),
                       _buildDrawerItem(
                         context,
-                        icon: Icons.event,
+                        icon: Icons.inventory_2,
                         title: 'Inventory',
                         onTap: () {
                           Navigator.push(
@@ -494,7 +494,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'Created by Team 404 Not Found with love ❤️',
+                    'Built for Climate Action 🌍💚',
                     style: TextStyle(color: Colors.white54, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
@@ -512,7 +512,7 @@ class _AnimatedDrawerState extends State<AnimatedDrawer>
       required String title,
       required VoidCallback onTap}) {
     return ListTile(
-      leading: Icon(icon, color: Colors.purpleAccent, size: 28),
+      leading: Icon(icon, color: Colors.lightGreenAccent, size: 28),
       title: Text(
         title,
         style: const TextStyle(color: Colors.white, fontSize: 18),
@@ -530,6 +530,7 @@ class AboutUsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('About Us'),
+        backgroundColor: Colors.green.shade700,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -538,13 +539,45 @@ class AboutUsPage extends StatelessWidget {
           children: [
             // App Overview
             Text(
-              'App Overview',
+              'Our Mission: AI for Climate Change',
               style: Theme.of(context).textTheme.displayMedium,
             ),
             const SizedBox(height: 10),
             Text(
-              'FarmConnect is a mobile-based marketplace that directly connects farmers with customers, eliminating intermediaries and ensuring fair prices for both parties. The app aims to revolutionize the agricultural supply chain, promoting transparency, efficiency, and sustainability.',
+              'ClimateAI FarmAssist is a comprehensive platform that combines artificial intelligence with climate science to help farmers adapt to the challenges of climate change. We provide real-time climate insights, sustainable farming practices, and connect farmers with climate-focused organizations and resources.',
               style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 20),
+
+            // Climate Focus
+            Text(
+              'Climate Change & Agriculture',
+              style: Theme.of(context).textTheme.displayMedium,
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              leading: const Icon(Icons.thermostat, color: Colors.orange),
+              title: const Text('Rising Temperatures'),
+              subtitle: const Text(
+                  'Our AI helps farmers adapt crop selection and timing to changing temperature patterns.'),
+            ),
+            ListTile(
+              leading: Icon(Icons.water_drop, color: Colors.blue.shade700),
+              title: const Text('Water Scarcity'),
+              subtitle: const Text(
+                  'Smart irrigation planning and water conservation techniques for sustainable farming.'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.storm, color: Colors.grey),
+              title: const Text('Extreme Weather Events'),
+              subtitle: const Text(
+                  'Early warning systems and preparedness strategies for droughts, floods, and storms.'),
+            ),
+            ListTile(
+              leading: Icon(Icons.eco, color: Colors.green.shade700),
+              title: const Text('Carbon Footprint Reduction'),
+              subtitle: const Text(
+                  'Tools to measure and reduce agricultural emissions through sustainable practices.'),
             ),
             const SizedBox(height: 20),
 
@@ -555,46 +588,40 @@ class AboutUsPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('Farmer Profiles'),
+              leading: Icon(Icons.smart_toy, color: Colors.teal),
+              title: Text('Climate AI Assistant'),
               subtitle: Text(
-                  'Farmers can create profiles showcasing their produce, pricing, and location.'),
+                  'AI-powered chatbot providing personalized climate insights and farming recommendations.'),
             ),
             const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('Product Catalog'),
+              leading: Icon(Icons.cloud, color: Colors.blueGrey),
+              title: Text('Climate & Weather Monitoring'),
               subtitle: Text(
-                  'A comprehensive catalog of fresh produce, allowing customers to browse and select products.'),
+                  'Real-time weather data and long-term climate trend analysis for informed decision-making.'),
             ),
             const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('Ordering and Payment'),
+              leading: Icon(Icons.agriculture, color: Colors.brown),
+              title: Text('Phenological Tracking'),
               subtitle: Text(
-                  'Customers can place orders and make payments directly through the app.'),
+                  'Monitor crop growth stages and receive climate-specific recommendations.'),
             ),
             const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('Real-time Tracking'),
+              leading: Icon(Icons.volunteer_activism, color: Colors.green),
+              title: Text('Climate Initiative Marketplace'),
               subtitle: Text(
-                  'Customers can track the status of their orders, from harvesting to delivery.'),
+                  'Connect with organizations offering funding, resources, and support for sustainable practices.'),
             ),
             const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('Rating and Review'),
+              leading: Icon(Icons.nature, color: Colors.lightGreen),
+              title: Text('Sustainable Product Catalog'),
               subtitle: Text(
-                  'Customers can rate and review farmers, promoting accountability and quality.'),
+                  'Browse eco-friendly farming inputs and climate-smart agricultural products.'),
             ),
             const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('Push Notifications'),
+              leading: Icon(Icons.calculate, color: Colors.amber),
+              title: Text('Climate-Smart Toolkit'),
               subtitle: Text(
-                  'Farmers receive notifications for new orders, and customers receive updates on order status.'),
-            ),
-            const ListTile(
-              leading: Icon(Icons.star, color: Colors.purpleAccent),
-              title: Text('GPS-enabled Delivery'),
-              subtitle: Text(
-                  'Farmers can opt for GPS-enabled delivery, ensuring efficient and timely delivery.'),
+                  'Calculators and planners optimized for sustainable, water-efficient farming.'),
             ),
 
             const SizedBox(height: 20),
@@ -606,40 +633,28 @@ class AboutUsPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const ListTile(
-              leading: Icon(Icons.healing, color: Colors.purpleAccent),
-              title: Text('Increased Profitability'),
+              leading: Icon(Icons.shield, color: Colors.green),
+              title: Text('Climate Resilience'),
               subtitle: Text(
-                  'By eliminating intermediaries, farmers can earn higher profits.'),
+                  'Build resilience against unpredictable weather patterns and climate extremes.'),
             ),
             const ListTile(
-              leading: Icon(Icons.expand, color: Colors.purpleAccent),
-              title: Text('Improved Market Access'),
+              leading: Icon(Icons.insights, color: Colors.blue),
+              title: Text('AI-Powered Insights'),
               subtitle: Text(
-                  'Farmers can reach a wider customer base, reducing dependence on local markets.'),
+                  'Make data-driven decisions with personalized climate and crop recommendations.'),
             ),
             const ListTile(
-              leading: Icon(Icons.feedback, color: Colors.purpleAccent),
-              title: Text('Real-time Feedback'),
+              leading: Icon(Icons.savings, color: Colors.amber),
+              title: Text('Access Climate Funding'),
               subtitle: Text(
-                  'Farmers receive feedback from customers, helping them improve quality and services.'),
+                  'Connect with grants, subsidies, and carbon credit programs for sustainable practices.'),
             ),
             const ListTile(
-              leading: Icon(Icons.inventory, color: Colors.purpleAccent),
-              title: Text('Easy Inventory Management'),
+              leading: Icon(Icons.water, color: Colors.lightBlue),
+              title: Text('Water Conservation'),
               subtitle: Text(
-                  'With the help of optimization tools to manage inventory efficiently.'),
-            ),
-            const ListTile(
-              leading: Icon(Icons.route, color: Colors.purpleAccent),
-              title: Text('Route Optimization'),
-              subtitle: Text(
-                  'Optimizing delivery routes makes the delivery process seamless and efficient.'),
-            ),
-            const ListTile(
-              leading: Icon(Icons.cloud, color: Colors.purpleAccent),
-              title: Text('Special Weather Mapping'),
-              subtitle: Text(
-                  'Algorithms support delivery optimization based on food types and weather conditions.'),
+                  'Optimize irrigation and reduce water usage with smart planning tools.'),
             ),
 
             const SizedBox(height: 20),
@@ -651,22 +666,22 @@ class AboutUsPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const ListTile(
-              leading: Icon(Icons.eco, color: Colors.purpleAccent),
-              title: Text('Fresh and Quality Produce'),
+              leading: Icon(Icons.eco, color: Colors.green),
+              title: Text('Sustainable Choices'),
               subtitle: Text(
-                  'Customers can purchase fresh, high-quality produce directly from farmers.'),
+                  'Access to sustainably produced, climate-friendly food options.'),
             ),
             const ListTile(
-              leading: Icon(Icons.price_change, color: Colors.purpleAccent),
-              title: Text('Competitive Pricing'),
+              leading: Icon(Icons.visibility, color: Colors.teal),
+              title: Text('Environmental Transparency'),
               subtitle: Text(
-                  'Customers can enjoy competitive pricing, as farmers set their own prices.'),
+                  'Know the environmental impact and sustainable journey of your food.'),
             ),
             const ListTile(
-              leading: Icon(Icons.visibility, color: Colors.purpleAccent),
-              title: Text('Transparency and Accountability'),
+              leading: Icon(Icons.favorite, color: Colors.red),
+              title: Text('Support Climate Action'),
               subtitle: Text(
-                  'Customers can track orders and provide feedback, promoting transparency and accountability.'),
+                  'Directly contribute to farmer climate adaptation and sustainable agriculture.'),
             ),
 
             const SizedBox(height: 20),
@@ -678,18 +693,39 @@ class AboutUsPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              '1. Flutter\n'
-              '2. Open Streets and Apple Map\n'
-              '3. Dart\n'
-              '4. Gradle\n'
-              '5. Local Storage Shared Preferences & 12 Packages\n'
-              '6. Machine Learning with Random Forest and more\n'
-              '7. AI Support and Ultra Navigation',
+              '1. Flutter & Dart\n'
+              '2. Google Generative AI (Gemini) for Climate Insights\n'
+              '3. OpenStreetMap & Apple Maps\n'
+              '4. Real-time Weather & Climate APIs\n'
+              '5. Machine Learning for Climate Predictions\n'
+              '6. Shared Preferences & Local Storage\n'
+              '7. Secure Payment Integration',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            Text(
-              'Created by HackMates with love ❤️',
-              style: Theme.of(context).textTheme.displayMedium,
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    '🌍 Built for Climate Action',
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          color: Colors.green.shade700,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Together, we can help farmers adapt to climate change and build a more sustainable agricultural future.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 20),

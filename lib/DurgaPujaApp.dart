@@ -17,13 +17,13 @@ class DurgaPujaApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Colors.white), // Updated from bodyText2 to bodyMedium
         ),
       ),
-      home: const FarmAssistXWebsite(), // Updated from DurgaPujaWebsite
+      home: const ClimateAIWebsite(), // Updated for Climate focus
     );
   }
 }
 
-class FarmAssistXWebsite extends StatelessWidget { // Renamed from DurgaPujaWebsite
-  const FarmAssistXWebsite({super.key});
+class ClimateAIWebsite extends StatelessWidget { // Renamed from FarmAssistXWebsite
+  const ClimateAIWebsite({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,64 +33,64 @@ class FarmAssistXWebsite extends StatelessWidget { // Renamed from DurgaPujaWebs
         children: [
           buildSection(
             context,
-            'FarmAssistX: Empowering Farmers and Enriching Customers',
-            'FarmAssistX is a mobile-based marketplace that directly connects farmers with customers, eliminating intermediaries and ensuring fair prices for both parties. Our app revolutionizes the agricultural supply chain by promoting transparency, efficiency, and sustainability.',
-            'assets/images/farm_assistx_image.jpg', // Updated image path
+            'ClimateAI FarmAssist: AI for Climate Change',
+            'ClimateAI FarmAssist is a comprehensive platform that combines artificial intelligence with climate science to help farmers adapt to the challenges of climate change. We provide real-time climate insights, sustainable farming practices, and connect farmers with climate-focused organizations and resources.',
+            'assets/images/farm_assistx_image.jpg',
             animationType: AnimationType.slideInLeft,
           ),
           buildSection(
             context,
-            'Key Features of FarmAssistX',
-            'FarmAssistX offers a suite of features designed to enhance the farming and shopping experience:',
+            'Climate Intelligence Features',
+            'Our AI-powered platform provides farmers with the tools they need to make climate-smart decisions:',
             'assets/images/features_image.jpg',
             animationType: AnimationType.fadeIn,
           ),
           buildSection(
             context,
-            'Farmer Profiles',
-            'Farmers can create detailed profiles showcasing their produce, pricing, and location, enabling customers to make informed decisions.',
+            'Climate AI Assistant',
+            'Get personalized climate insights and farming recommendations from our AI chatbot, powered by advanced language models and climate science.',
             'assets/images/farmer_profiles.jpg',
             animationType: AnimationType.slideInRight,
           ),
           buildSection(
             context,
-            'Product Catalog',
-            'Browse a comprehensive catalog of fresh produce, allowing customers to select products that meet their needs.',
+            'Weather & Climate Monitoring',
+            'Real-time weather data and long-term climate trend analysis help you plan and adapt to changing conditions.',
             'assets/images/product_catalog.jpg',
             animationType: AnimationType.fadeIn,
           ),
           buildSection(
             context,
-            'Ordering and Payment',
-            'Place orders seamlessly and make secure payments directly through the app, ensuring a hassle-free shopping experience.',
+            'Sustainable Farming Practices',
+            'Learn water conservation, organic farming, and eco-friendly techniques to reduce your carbon footprint and build resilience.',
             'assets/images/ordering_payment.jpg',
             animationType: AnimationType.slideInLeft,
           ),
           buildSection(
             context,
-            'Real-time Tracking',
-            'Track the status of your orders from harvesting to delivery with our real-time tracking system.',
+            'Climate-Smart Planning',
+            'Schedule farm operations based on weather forecasts and climate patterns. Our tools help you optimize timing for sowing, irrigation, and harvest.',
             'assets/images/real_time_tracking.jpg',
             animationType: AnimationType.slideInRight,
           ),
           buildSection(
             context,
-            'Rating and Review',
-            'Rate and review farmers to promote accountability and maintain high-quality standards.',
+            'Climate Initiative Marketplace',
+            'Connect with organizations offering grants for sustainable practices, access eco-friendly products, and participate in carbon credit programs.',
             'assets/images/rating_review.jpg',
             animationType: AnimationType.fadeIn,
           ),
           buildSection(
             context,
-            'GPS-enabled Delivery',
-            'Opt for GPS-enabled delivery to ensure efficient and timely delivery of your orders.',
+            'Carbon Footprint Tracking',
+            'Measure and reduce your farm\'s environmental impact with our carbon calculator and sustainability tools.',
             'assets/images/gps_delivery.jpg',
             animationType: AnimationType.slideInLeft,
           ),
           buildSection(
             context,
-            'Conclusion: Building a Sustainable Agricultural Ecosystem',
-            'FarmAssistX is not just an app; it\'s a movement towards a more sustainable and transparent agricultural ecosystem. By bridging the gap between farmers and customers, we aim to empower both parties and contribute to the overall growth and prosperity of the farming community.',
+            'Building a Climate-Resilient Future',
+            'ClimateAI FarmAssist is more than an app; it\'s a movement towards climate-resilient agriculture. Together, we can help farmers adapt to climate change while building sustainable food systems for future generations.',
             'assets/images/conclusion_farmassistx.png',
             animationType: AnimationType.slideInRight,
           ),

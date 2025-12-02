@@ -20,23 +20,23 @@ class _InitialPageState extends State<InitialPage> {
         children: <Widget>[
           ContentCard(
             color: 'Red',
-            altColor: Color(0xFF4259B2),
-            title: "Start Your Day with FarmAssistX",
+            altColor: Color(0xFF2E7D32),
+            title: "AI for Climate Resilience",
             subtitle:
-                'Begin your morning by connecting with farmers and selecting fresh produce for the day.',
+                'Get personalized climate insights and adapt your farming practices to changing weather patterns.',
           ),
           ContentCard(
               color: 'Yellow',
-              altColor: Color(0xFF904E93),
-              title: "Manage Your Orders Efficiently",
+              altColor: Color(0xFF00695C),
+              title: "Sustainable Farming Tools",
               subtitle:
-                  'In the afternoon, place orders effortlessly and track your transactions in real-time.'),
+                  'Access water conservation planners, carbon calculators, and eco-friendly farming techniques.'),
           ContentCard(
             color: 'Blue',
-            altColor: Color(0xFFFFB138),
-            title: "End Your Day with Order Tracking",
+            altColor: Color(0xFF1565C0),
+            title: "Climate Initiative Marketplace",
             subtitle:
-                'Conclude your day by monitoring the delivery status of your orders and providing feedback.',
+                'Connect with climate organizations, access funding for sustainable practices, and trade in eco-friendly products.',
           ),
         ],
       ),
