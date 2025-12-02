@@ -1,5 +1,5 @@
 name: farm_assistx
-description: "A new Flutter project."
+description: "ClimateAI FarmAssist - AI for Climate Change: Helping farmers adapt to climate challenges"
 
 # Prevent accidental publishing to pub.dev.
 publish_to: "none"

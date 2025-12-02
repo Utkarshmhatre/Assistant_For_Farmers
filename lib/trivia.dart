@@ -53,6 +53,12 @@ class _TriviaPageState extends State<TriviaPage> {
   final TextEditingController _costPerHaCtrl = TextEditingController();
   String _profitResult = '';
 
+  // Carbon footprint calculator
+  final TextEditingController _carbonAreaHaCtrl = TextEditingController();
+  final TextEditingController _fertilizerKgCtrl = TextEditingController();
+  final TextEditingController _fuelLitersCtrl = TextEditingController();
+  String _carbonResult = '';
+
   @override
   void dispose() {
     _seedAreaHaCtrl.dispose();
@@ -68,6 +74,9 @@ class _TriviaPageState extends State<TriviaPage> {
     _profitAreaHaCtrl.dispose();
     _pricePerTonCtrl.dispose();
     _costPerHaCtrl.dispose();
+    _carbonAreaHaCtrl.dispose();
+    _fertilizerKgCtrl.dispose();
+    _fuelLitersCtrl.dispose();
     super.dispose();
   }
 
@@ -75,8 +84,8 @@ class _TriviaPageState extends State<TriviaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Farmer Toolkit'),
-        backgroundColor: Colors.green,
+        title: const Text('Climate-Smart Toolkit'),
+        backgroundColor: Colors.green.shade700,
       ),
       body: Theme(
         data: Theme.of(context).copyWith(
@@ -98,17 +107,71 @@ class _TriviaPageState extends State<TriviaPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildSeedRateCard(context),
+              _buildCarbonCard(context),
               const SizedBox(height: 12),
-              _buildFertilizerCard(context),
+              _buildSeedRateCard(context),
               const SizedBox(height: 12),
               _buildIrrigationCard(context),
               const SizedBox(height: 12),
+              _buildFertilizerCard(context),
+              const SizedBox(height: 12),
               _buildProfitCard(context),
               const SizedBox(height: 12),
-              _buildQuickTipsCard(context),
+              _buildClimateTipsCard(context),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // Carbon Footprint Calculator (NEW)
+  Widget _buildCarbonCard(BuildContext context) {
+    return Card(
+      color: Colors.white.withOpacity(0.06),
+      elevation: 2,
+      shape: _cardShape,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const Icon(Icons.eco, color: Colors.lightGreenAccent),
+              const SizedBox(width: 8),
+              Text('Carbon Footprint Calculator', style: _titleStyle),
+            ]),
+            const SizedBox(height: 8),
+            Text(
+              'Estimate your farm\'s carbon emissions.\nCO2 = (Fertilizer × 4.5) + (Fuel × 2.68) kg CO2 equivalent',
+              style: _subtleStyle,
+            ),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: _numField(_carbonAreaHaCtrl, label: 'Area (ha)')),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: _numField(_fertilizerKgCtrl,
+                      label: 'Fertilizer (kg)')),
+            ]),
+            const SizedBox(height: 8),
+            Row(children: [
+              Expanded(
+                  child:
+                      _numField(_fuelLitersCtrl, label: 'Diesel fuel (L)')),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                style: _btnStyle,
+                onPressed: _calcCarbonFootprint,
+                child: const Text('Calculate'),
+              ),
+            ]),
+            if (_carbonResult.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(_carbonResult,
+                  style: const TextStyle(color: Colors.lightGreenAccent)),
+            ]
+          ],
         ),
       ),
     );
@@ -128,11 +191,11 @@ class _TriviaPageState extends State<TriviaPage> {
             Row(children: [
               const Icon(Icons.spa, color: Colors.lightGreenAccent),
               const SizedBox(width: 8),
-              Text('Seed Requirement', style: _titleStyle),
+              Text('Climate-Resilient Seed Calculator', style: _titleStyle),
             ]),
             const SizedBox(height: 8),
             Text(
-              'Estimate seed needed.\nSeed needed (kg) = Area (ha) × Seed rate (kg/ha) × (100 / Germination %)',
+              'Estimate seed needed for climate-adapted varieties.\nSeed needed (kg) = Area (ha) × Seed rate (kg/ha) × (100 / Germination %)',
               style: _subtleStyle,
             ),
             const SizedBox(height: 12),
@@ -179,11 +242,11 @@ class _TriviaPageState extends State<TriviaPage> {
             Row(children: [
               const Icon(Icons.grass, color: Colors.lightGreenAccent),
               const SizedBox(width: 8),
-              Text('Fertilizer Planner (N-P2O5-K2O)', style: _titleStyle),
+              Text('Sustainable Fertilizer Planner', style: _titleStyle),
             ]),
             const SizedBox(height: 8),
             Text(
-                'Approximate split using DAP (18-46-0), Urea (46-0-0), MOP (0-0-60).',
+                'Calculate eco-friendly fertilizer needs (N-P2O5-K2O).\nUsing DAP (18-46-0), Urea (46-0-0), MOP (0-0-60).',
                 style: _subtleStyle),
             const SizedBox(height: 12),
             Row(children: [
@@ -233,10 +296,10 @@ class _TriviaPageState extends State<TriviaPage> {
             Row(children: [
               const Icon(Icons.water_drop, color: Colors.lightBlueAccent),
               const SizedBox(width: 8),
-              Text('Irrigation Water Need', style: _titleStyle),
+              Text('Water Conservation Planner', style: _titleStyle),
             ]),
             const SizedBox(height: 8),
-            Text('Volume = Area (ha) × 10,000 × Depth (mm) / 1000',
+            Text('Calculate optimal water usage for climate-smart irrigation.\nVolume = Area (ha) × 10,000 × Depth (mm) / 1000',
                 style: _subtleStyle),
             const SizedBox(height: 12),
             Row(children: [
@@ -277,10 +340,10 @@ class _TriviaPageState extends State<TriviaPage> {
             Row(children: [
               const Icon(Icons.attach_money, color: Colors.amberAccent),
               const SizedBox(width: 8),
-              Text('Profit Estimator', style: _titleStyle),
+              Text('Climate-Smart Profit Estimator', style: _titleStyle),
             ]),
             const SizedBox(height: 8),
-            Text('Profit = Revenue − Cost. Revenue = Yield × Area × Price',
+            Text('Factor in sustainable practices for better returns.\nProfit = Revenue − Cost. Revenue = Yield × Area × Price',
                 style: _subtleStyle),
             const SizedBox(height: 12),
             Row(children: [
@@ -317,7 +380,7 @@ class _TriviaPageState extends State<TriviaPage> {
     );
   }
 
-  Widget _buildQuickTipsCard(BuildContext context) {
+  Widget _buildClimateTipsCard(BuildContext context) {
     return Card(
       color: Colors.white.withOpacity(0.06),
       elevation: 2,
@@ -330,18 +393,20 @@ class _TriviaPageState extends State<TriviaPage> {
             Row(children: [
               const Icon(Icons.tips_and_updates, color: Colors.orangeAccent),
               const SizedBox(width: 8),
-              Text('Quick Tips', style: _titleStyle),
+              Text('Climate Adaptation Tips', style: _titleStyle),
             ]),
             const SizedBox(height: 8),
-            Text('• Test soil every 2–3 years; adjust NPK accordingly.',
+            Text('🌡️ Monitor weather forecasts and adjust planting schedules.',
                 style: _subtleStyle),
-            Text('• Mulch to reduce evaporation and weeds.',
+            Text('💧 Use drip irrigation to reduce water usage by up to 70%.',
                 style: _subtleStyle),
-            Text(
-                '• Prefer drip for orchards/vegetables; schedule by soil moisture.',
+            Text('🌱 Choose drought-resistant and heat-tolerant crop varieties.',
                 style: _subtleStyle),
-            Text(
-                '• Diversify crops and rotate to improve soil and reduce pests.',
+            Text('🌿 Practice crop rotation and intercropping for soil health.',
+                style: _subtleStyle),
+            Text('♻️ Avoid stubble burning; use mulching or composting instead.',
+                style: _subtleStyle),
+            Text('🌳 Plant trees on field boundaries for windbreaks and carbon capture.',
                 style: _subtleStyle),
           ],
         ),
@@ -434,5 +499,30 @@ class _TriviaPageState extends State<TriviaPage> {
     final profit = revenue - cost;
     setState(() => _profitResult =
         'Revenue: ₹${revenue.toStringAsFixed(0)}  |  Cost: ₹${cost.toStringAsFixed(0)}\nEstimated Profit: ₹${profit.toStringAsFixed(0)}');
+  }
+
+  void _calcCarbonFootprint() {
+    final area = _p(_carbonAreaHaCtrl);
+    final fertilizer = _p(_fertilizerKgCtrl);
+    final fuel = _p(_fuelLitersCtrl);
+    if (area <= 0) {
+      setState(() => _carbonResult = 'Please enter a valid area.');
+      return;
+    }
+    // Simplified carbon calculation
+    // Fertilizer: ~4.5 kg CO2 per kg N fertilizer
+    // Diesel: ~2.68 kg CO2 per liter
+    final fertilizerCO2 = fertilizer * 4.5;
+    final fuelCO2 = fuel * 2.68;
+    final totalCO2 = fertilizerCO2 + fuelCO2;
+    final perHa = totalCO2 / area;
+    
+    String offsetSuggestion = '';
+    if (totalCO2 > 500) {
+      offsetSuggestion = '\n💡 Consider: organic fertilizers, solar pumps, minimum tillage';
+    }
+    
+    setState(() => _carbonResult =
+        'Total CO2: ${totalCO2.toStringAsFixed(1)} kg\nPer hectare: ${perHa.toStringAsFixed(1)} kg CO2/ha$offsetSuggestion');
   }
 }

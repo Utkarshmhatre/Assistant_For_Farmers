@@ -33,7 +33,8 @@ class _WeatherScreenState extends State<WeatherScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Air Quality '),
+        title: const Text('Climate & Weather Monitoring'),
+        backgroundColor: Colors.green.shade700,
         actions: [
           IconButton(
             icon: const Icon(Icons.brightness_6),
@@ -45,11 +46,11 @@ class _WeatherScreenState extends State<WeatherScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.map), text: 'Weather Map'),
-            Tab(icon: Icon(Icons.bar_chart), text: 'Air Quality Data'),
+            Tab(icon: Icon(Icons.cloud), text: 'Climate Map'),
+            Tab(icon: Icon(Icons.eco), text: 'Air Quality'),
             Tab(
-                icon: Icon(Icons.api),
-                text: 'API Page'), // Added tab for API page
+                icon: Icon(Icons.analytics),
+                text: 'Climate Data'),
           ],
         ),
       ),

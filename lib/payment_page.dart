@@ -123,7 +123,7 @@ class _PaymentPageState extends State<PaymentPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pay Farmer'),
+        title: const Text('Support Climate Initiatives'),
         backgroundColor: Colors.green[700],
       ),
       body: Stack(
@@ -141,11 +141,38 @@ class _PaymentPageState extends State<PaymentPage>
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Animated Farmer Icon using FadeTransition
+                  // Animated Climate Icon using FadeTransition
                   FadeTransition(
                     opacity: _fadeAnimation,
-                    child: const Icon(Icons.person, size: 200, color: Colors.green),
+                    child: const Icon(Icons.eco, size: 200, color: Colors.green),
                   ),
+                  // Info Card
+                  Card(
+                    elevation: 4,
+                    color: Colors.green.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            '🌍 Support Climate Action',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Your contribution helps farmers adopt sustainable practices, access climate-resilient seeds, and implement water conservation technologies.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.green.shade800),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   // Input Fields with enhanced styling
                   Card(
                     elevation: 4,
@@ -168,8 +195,8 @@ class _PaymentPageState extends State<PaymentPage>
                           TextField(
                             controller: locationController,
                             decoration: InputDecoration(
-                              labelText: 'Farmer Name/Location',
-                              prefixIcon: const Icon(Icons.location_on,
+                              labelText: 'Climate Initiative / Farmer Name',
+                              prefixIcon: const Icon(Icons.eco,
                                   color: Colors.green),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -182,7 +209,7 @@ class _PaymentPageState extends State<PaymentPage>
                   ),
                   const SizedBox(height: 30),
 
-                  // Payment Amount Section
+                  // Contribution Amount Section
                   Card(
                     elevation: 4,
                     child: Padding(
@@ -192,14 +219,14 @@ class _PaymentPageState extends State<PaymentPage>
                           // Replace Lottie animation with ScaleTransition
                           ScaleTransition(
                             scale: _scaleAnimation,
-                            child: const Icon(Icons.payment,
+                            child: const Icon(Icons.volunteer_activism,
                                 size: 100, color: Colors.green),
                           ),
                           const SizedBox(height: 15),
                           TextField(
                             controller: customAmountController,
                             decoration: InputDecoration(
-                              labelText: 'Enter Amount (₹)',
+                              labelText: 'Contribution Amount (₹)',
                               prefixIcon: const Icon(Icons.currency_rupee,
                                   color: Colors.green),
                               border: OutlineInputBorder(
@@ -232,8 +259,8 @@ class _PaymentPageState extends State<PaymentPage>
                             );
                           }
                         },
-                        icon: const Icon(Icons.payment),
-                        label: const Text('Pay Now'),
+                        icon: const Icon(Icons.favorite),
+                        label: const Text('Contribute'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(
@@ -257,7 +284,7 @@ class _PaymentPageState extends State<PaymentPage>
                         icon: const Icon(Icons.receipt_long),
                         label: const Text('Get Receipt'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.teal,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 15),
                           shape: RoundedRectangleBorder(
@@ -304,7 +331,7 @@ class _PaymentPageState extends State<PaymentPage>
       final gradient = ui.Gradient.linear(
         const Offset(0, 0),
         const Offset(600, 800),
-        [Colors.blueAccent, Colors.purpleAccent],
+        [Colors.green, Colors.teal],
       );
       final paint = Paint()..shader = gradient;
       canvas.drawRect(const Rect.fromLTWH(0, 0, 600, 800), paint);
@@ -312,11 +339,12 @@ class _PaymentPageState extends State<PaymentPage>
       // Draw text for receipt
       final textPainter = TextPainter(
         text: TextSpan(
-          text: 'Payment Receipt\n\n'
+          text: 'Climate Initiative Receipt\n\n'
               'Dear $name,\n\n'
-              'Thank you for your payment to the farmer at $location.\n'
-              'We appreciate your support!\n\n'
-              'Please keep this receipt for your records.',
+              'Thank you for your contribution to "$location".\n'
+              'Your support helps farmers adapt to climate change\n'
+              'and build a more sustainable future!\n\n'
+              '🌍 Together for Climate Action 💚',
           style: const TextStyle(
             color: Colors.white, // Set text color to white
             fontSize: 24,
@@ -345,22 +373,22 @@ class _PaymentPageState extends State<PaymentPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.green.shade800,
           title: const Text(
-            'Receipt',
+            '🌍 Climate Initiative Receipt',
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
             'Dear $name,\n\n'
-            'Thank you for your payment to the farmer at $location.\n'
-            'We appreciate your support!\n\n'
-            'Please keep this receipt for your records.',
-            style: TextStyle(color: Colors.white),
+            'Thank you for your contribution to "$location".\n'
+            'Your support helps farmers adapt to climate change and build a more sustainable future!\n\n'
+            '💚 Together for Climate Action',
+            style: const TextStyle(color: Colors.white),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close', style: TextStyle(color: Colors.blue)),
+              child: const Text('Close', style: TextStyle(color: Colors.lightGreenAccent)),
             ),
           ],
         );

@@ -19,7 +19,7 @@ class _BallBounceIndexState extends State<BallBounceIndex> {
         context,
         MaterialPageRoute(
             builder: (context) => const InitialPage(
-                  title: 'abc',
+                  title: 'ClimateAI FarmAssist',
                 )), // Replace with your initial page widget
       );
     });
@@ -34,7 +34,7 @@ class _BallBounceIndexState extends State<BallBounceIndex> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 130),
               child: const CircleAvatar(
-                backgroundColor: Color.fromARGB(255, 108, 25, 218),
+                backgroundColor: Color.fromARGB(255, 46, 125, 50),
               )
                   .animate()
                   .slideY(begin: -0.5, end: 0.2, duration: 0.5.seconds)
