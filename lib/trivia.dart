@@ -8,6 +8,11 @@ class TriviaPage extends StatefulWidget {
 }
 
 class _TriviaPageState extends State<TriviaPage> {
+  // Carbon emission constants (kg CO2 equivalent)
+  static const double _fertilizerCO2Factor = 4.5;  // kg CO2 per kg N fertilizer
+  static const double _dieselCO2Factor = 2.68;     // kg CO2 per liter diesel
+  static const double _highCarbonThreshold = 500.0; // kg CO2 threshold for suggestions
+
   // Local styles for dark theme contrast
   TextStyle get _titleStyle => const TextStyle(
         fontSize: 18,
@@ -509,16 +514,14 @@ class _TriviaPageState extends State<TriviaPage> {
       setState(() => _carbonResult = 'Please enter a valid area.');
       return;
     }
-    // Simplified carbon calculation
-    // Fertilizer: ~4.5 kg CO2 per kg N fertilizer
-    // Diesel: ~2.68 kg CO2 per liter
-    final fertilizerCO2 = fertilizer * 4.5;
-    final fuelCO2 = fuel * 2.68;
+    // Calculate carbon emissions using defined constants
+    final fertilizerCO2 = fertilizer * _fertilizerCO2Factor;
+    final fuelCO2 = fuel * _dieselCO2Factor;
     final totalCO2 = fertilizerCO2 + fuelCO2;
     final perHa = totalCO2 / area;
     
     String offsetSuggestion = '';
-    if (totalCO2 > 500) {
+    if (totalCO2 > _highCarbonThreshold) {
       offsetSuggestion = '\n💡 Consider: organic fertilizers, solar pumps, minimum tillage';
     }
     

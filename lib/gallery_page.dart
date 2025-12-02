@@ -157,21 +157,29 @@ class GalleryPage extends StatelessWidget {
   }
 
   static String _getImageUrl(String category) {
+    // Note: These are placeholder images. In production, replace with actual
+    // sustainable product images or use a dedicated image CDN.
     switch (category.toLowerCase()) {
       case 'organic_seeds':
+        // Placeholder for organic seeds - using a fruits image as temporary placeholder
         return 'https://nurserylive.com/cdn/shop/articles/assortment-of-colorful-ripe-tropical-fruits-top-royalty-free-image-995518546-1564092355-816049.jpg?v=1679747958';
       case 'solar_irrigation':
+        // Placeholder for solar irrigation equipment
         return 'https://cdn.britannica.com/17/196817-159-9E487F15/vegetables.jpg';
       case 'organic_fertilizer':
+        // Placeholder for organic fertilizer products
         return 'https://cdn-prod.medicalnewstoday.com/content/images/articles/280/280579/potatoes-can-be-healthful.jpg';
       case 'water_conservation':
+        // Placeholder for water conservation technology
         return 'https://static01.nyt.com/images/2024/10/08/multimedia/13EATrex-LD-briocherex-blfk/13EATrex-LD-briocherex-blfk-jumbo.jpg';
       case 'sustainable_produce':
+        // Placeholder for sustainably grown produce
         return 'https://www.dairyfoods.com/ext/resources/DF/2024/Nov/GettyImages-2150650373.jpg?1734040205';
       case 'eco_tools':
+        // Placeholder for eco-friendly farming tools
         return 'https://i0.wp.com/post.healthline.com/wp-content/uploads/2020/05/eggs-counter-1296x728-header.jpg?w=1155&h=1528';
       default:
-        return 'https://via.placeholder.com/150';
+        return 'https://via.placeholder.com/300x200?text=Sustainable+Product';
     }
   }
 }
